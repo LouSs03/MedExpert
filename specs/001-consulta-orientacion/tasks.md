@@ -176,15 +176,15 @@ dolor de cabeza + uso de aspirina): Derivar al médico, solo el mensaje de combi
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T059 [P] [US2] Escribir `tests/unit/application/test_evaluar_consulta_no_cubierta.py`: con `FakeMotorInferencia` vacío → `DERIVAR`, `sin_regla = True`, exactamente un `MensajeSistema` `COMBINACION_NO_CUBIERTA` con `pendiente_aprobacion = False`, ningún `SINTOMA_NO_CUBIERTO` (aunque haya síntomas), `reglas_disparadas` y `sintomas_no_cubiertos` vacíos
-- [ ] T060 [P] [US2] Escribir `tests/unit/api/test_rutas_no_cubierta.py`: el HTML muestra "Derivar al médico", el texto exacto de `COMBINACION_NO_CUBIERTA` sin el distintivo de pendiente y "Ninguna regla aplicada"; el JSON cumple el caso `sin_regla = true` de la tabla "Casos de `mensajes_sistema`" de [contracts/http.md](contracts/http.md)
-- [ ] T061 [P] [US2] Añadir a `tests/integration/aceptacion/casos_reglas.yaml` una sección `no_cubiertos` con IBUPROFENO + FIEBRE sin condiciones y PARACETAMOL + DOLOR_CABEZA + USO_ASPIRINA (`nivel_esperado: DERIVAR`, `sin_regla: true`), y en `tests/integration/aceptacion/test_aceptacion_reglas.py` un test parametrizado sobre esa sección que verifica el nivel, `sin_regla` y el único mensaje del sistema (SC-002)
+- [X] T059 [P] [US2] Escribir `tests/unit/application/test_evaluar_consulta_no_cubierta.py`: con `FakeMotorInferencia` vacío → `DERIVAR`, `sin_regla = True`, exactamente un `MensajeSistema` `COMBINACION_NO_CUBIERTA` con `pendiente_aprobacion = False`, ningún `SINTOMA_NO_CUBIERTO` (aunque haya síntomas), `reglas_disparadas` y `sintomas_no_cubiertos` vacíos
+- [X] T060 [P] [US2] Escribir `tests/unit/api/test_rutas_no_cubierta.py`: el HTML muestra "Derivar al médico", el texto exacto de `COMBINACION_NO_CUBIERTA` sin el distintivo de pendiente y "Ninguna regla aplicada"; el JSON cumple el caso `sin_regla = true` de la tabla "Casos de `mensajes_sistema`" de [contracts/http.md](contracts/http.md)
+- [X] T061 [P] [US2] Añadir a `tests/integration/aceptacion/casos_reglas.yaml` una sección `no_cubiertos` con IBUPROFENO + FIEBRE sin condiciones y PARACETAMOL + DOLOR_CABEZA + USO_ASPIRINA (`nivel_esperado: DERIVAR`, `sin_regla: true`), y en `tests/integration/aceptacion/test_aceptacion_reglas.py` un test parametrizado sobre esa sección que verifica el nivel, `sin_regla` y el único mensaje del sistema (SC-002)
 
 ### Implementation for User Story 2
 
-- [ ] T062 [US2] Completar el paso 4 de `src/application/casos_uso/evaluar_consulta.py`: si `sin_regla`, `mensajes_sistema` es exactamente `(COMBINACION_NO_CUBIERTA,)`; nunca se mezclan los dos tipos
-- [ ] T063 [US2] Completar `src/api/plantillas/resultado.html` para el caso `sin_regla`: bloque de mensaje del sistema sin distintivo y `#explicacion` con "Ninguna regla aplicada"
-- [ ] T064 [US2] Añadir a `tests/e2e/test_flujo_consulta.py` los escenarios 8 y 9 de quickstart
+- [X] T062 [US2] Completar el paso 4 de `src/application/casos_uso/evaluar_consulta.py`: si `sin_regla`, `mensajes_sistema` es exactamente `(COMBINACION_NO_CUBIERTA,)`; nunca se mezclan los dos tipos
+- [X] T063 [US2] Completar `src/api/plantillas/resultado.html` para el caso `sin_regla`: bloque de mensaje del sistema sin distintivo y `#explicacion` con "Ninguna regla aplicada"
+- [X] T064 [US2] Añadir a `tests/e2e/test_flujo_consulta.py` los escenarios 8 y 9 de quickstart
 
 **Checkpoint**: US1 y US2 funcionan; T059–T061 y T064 en verde.
 
