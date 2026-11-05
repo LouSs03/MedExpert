@@ -47,6 +47,15 @@ permite revisarlo, versionarlo y auditarlo sin tocar el código.
   dispararon (R01–R30 y sucesivos).
 - Cada consulta DEBE persistirse con sus hechos de entrada, el nivel resultante y las reglas
   aplicadas.
+- **Única excepción: fallo técnico de persistencia.** Si el registro de una consulta falla por un
+  error técnico, el sistema:
+  - DEBE mostrar igualmente el resultado al usuario, porque ocultar una recomendación de seguridad
+    es peor que no registrarla;
+  - DEBE registrar el error en el log con detalle saneado (sin credenciales ni cadenas de conexión,
+    Principio X);
+  - DEBE marcar la respuesta como no persistida.
+
+  Fuera de este caso, toda consulta respondida DEBE quedar persistida.
 
 **Justificación**: un sistema experto que no explica su razonamiento no puede validarse
 clínicamente ni defenderse académicamente.
@@ -59,8 +68,9 @@ Estructura obligatoria:
   `Sintoma`, `Condicion`). CERO imports de FastAPI, SQLModel, clips o cualquier librería externa.
 - `src/application/`: casos de uso (`EvaluarConsulta`, `CargarBaseConocimiento`) e interfaces de
   puertos (`ReglaRepository`, `MotorInferencia`).
-- `src/infrastructure/`: adaptadores concretos; `db/` (`SupabaseReglaRepository` con SQLModel) e
-  `inference/` (`ClipsMotorInferencia` con clipspy).
+- `src/infrastructure/`: adaptadores concretos; `db/` (`PostgresReglaRepository` y
+  `PostgresConsultaRepository` con SQLModel) e `inference/` (`ClipsMotorInferencia` con clipspy).
+  Los adaptadores de `db/` dependen de PostgreSQL vía SQLModel, no del proveedor que aloja la base.
 - `src/api/`: routers de FastAPI, esquemas Pydantic y plantillas Jinja2.
 - `tests/`: `unit/`, `integration/`, `e2e/`.
 
@@ -74,7 +84,8 @@ sustituir adaptadores sin reescribir la lógica.
 ### V. Patrones de Diseño Obligatorios
 
 - **Repository**: interfaz `ReglaRepository` en `application/ports`; implementación
-  `SupabaseReglaRepository` en `infrastructure`. Los casos de uso NUNCA ejecutan SQL.
+  `PostgresReglaRepository` en `infrastructure` (y `PostgresConsultaRepository` para el registro
+  de consultas). Los casos de uso NUNCA ejecutan SQL.
 - **Port/Adapter**: interfaz `MotorInferencia` en `application/ports`; implementación
   `ClipsMotorInferencia` en `infrastructure`. DEBE existir además `FakeMotorInferencia` para
   pruebas sin CLIPS.
@@ -216,4 +227,4 @@ Todo pull request hacia `main` DEBE superar, como mínimo, estas puertas:
   excepción DEBE justificarse por escrito en el plan y aprobarse antes de implementarse; las
   violaciones de los Principios I, II y IV no admiten excepción.
 
-**Version**: 1.1.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04
+**Version**: 1.2.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04
