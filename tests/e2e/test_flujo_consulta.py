@@ -1,6 +1,6 @@
 """Flujo completo en navegador: formulario, envío, resultado y explicación (Principio VIII, e2e).
 
-Escenarios 1, 2, 3 y 6 de quickstart.md, contra la base de pruebas.
+Escenarios 1, 2, 3, 6, 8 y 9 de quickstart.md, contra la base de pruebas.
 """
 
 import pytest
@@ -70,3 +70,29 @@ def test_escenario_6_salvaguarda_de_cobertura(page: Page, servidor: str) -> None
         "Salvaguarda del sistema (pendiente de aprobación médica): "
         "síntomas sin regla aplicable: Fiebre"
     )
+
+
+@pytest.mark.parametrize(
+    "medicamento, sintomas, condiciones",
+    [
+        ("IBUPROFENO", ["FIEBRE"], []),
+        ("PARACETAMOL", ["DOLOR_CABEZA"], ["USO_ASPIRINA"]),
+    ],
+    ids=["escenario-8-ibuprofeno-fiebre", "escenario-9-paracetamol-cabeza-aspirina"],
+)
+def test_combinacion_no_cubierta(
+    page: Page, servidor: str, medicamento: str, sintomas: list[str], condiciones: list[str]
+) -> None:
+    _consultar(page, servidor, medicamento, sintomas, condiciones)
+
+    expect(page.locator("#resultado")).to_have_attribute("data-nivel", "DERIVAR")
+    expect(page.locator("#nivel")).to_have_text("Derivar al médico")
+    expect(page.locator(".regla")).to_have_count(0)
+    sistema = page.locator("#mensajes-sistema")
+    expect(sistema).to_contain_text(
+        "Esta combinación de medicamento, síntomas y condiciones no está cubierta por la base "
+        "de conocimiento validada. Consulte con un médico."
+    )
+    expect(sistema.locator(".distintivo-pendiente")).to_have_count(0)
+    expect(page.locator("#explicacion")).to_contain_text("Ninguna regla aplicada")
+    expect(page.locator("#explicacion")).not_to_contain_text("Salvaguarda del sistema")
