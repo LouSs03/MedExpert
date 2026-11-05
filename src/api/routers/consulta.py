@@ -15,6 +15,7 @@ from api.esquemas import (
     a_resultado_dto,
 )
 from api.pasos import ERRORES_POR_PASO, Estado, contexto_paso, paso_con_error
+from api.resultado import contexto_resultado
 from application.casos_uso.evaluar_consulta import EvaluarConsulta
 from domain.base_conocimiento import BaseConocimiento
 from domain.errores import VocabularioInvalido
@@ -129,9 +130,16 @@ def consultar_formulario(
         estado = Estado.desde(medicamento, sintomas, condiciones, ninguna)
         paso = paso_con_error(base.vocabulario, estado, hasta=4) or 3
         return _paso(request, plantillas, paso, base.vocabulario, estado, error.problemas, 422)
-    respuesta = plantillas.TemplateResponse(
-        request, "resultado.html", {"aviso": AVISO, "resultado": a_resultado_dto(resultado)}
+    contexto = contexto_resultado(
+        a_resultado_dto(resultado),
+        base.vocabulario,
+        medicamento,
+        sintomas or [],
+        condiciones or [],
+        ninguna,
+        reglas_en_base=len(base.reglas),
     )
+    respuesta = plantillas.TemplateResponse(request, "resultado.html", {"aviso": AVISO, **contexto})
     _marcar_persistencia(respuesta, resultado.persistida)
     return respuesta
 

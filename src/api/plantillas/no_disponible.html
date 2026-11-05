@@ -1,7 +1,16 @@
 {% extends "base.html" %}
+{% import "_iconos.html" as i %}
 {% block titulo %}Servicio no disponible{% endblock %}
+{% block clase_pagina %}pagina-no-disponible{% endblock %}
+{% block barra_accion %}{% endblock %}
 {% block contenido %}
-<h1>Servicio no disponible</h1>
-<p>El servicio no está disponible en este momento: la base de conocimiento validada no pudo cargarse.
-Si necesita orientación sobre un medicamento, consulte con un médico o un farmacéutico.</p>
+<section class="no-disponible" aria-labelledby="titulo-no-disponible">
+  {{ i.info("no-disponible-icono") }}
+  <h1 id="titulo-no-disponible" class="titulo-pantalla">Servicio no disponible</h1>
+  <p class="cuerpo">
+    El servicio no está disponible en este momento: la base de conocimiento validada no pudo
+    cargarse. Si necesita orientación sobre un medicamento, consulte con un médico o un
+    farmacéutico.
+  </p>
+</section>
 {% endblock %}
