@@ -47,7 +47,7 @@ def _texto(html: str) -> str:
 
 
 def test_formulario_muestra_el_vocabulario_y_el_aviso() -> None:
-    respuesta = _cliente().get("/")
+    respuesta = _cliente().get("/consulta/paso/1")
 
     assert respuesta.status_code == 200
     html = respuesta.text

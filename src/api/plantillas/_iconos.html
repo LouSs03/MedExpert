@@ -1,0 +1,67 @@
+{# Iconos SVG en línea: sin peticiones externas. Decorativos (aria-hidden) salvo que se indique. #}
+
+{% macro logo() -%}
+<svg class="icono icono-logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+  <rect width="32" height="32" rx="10" fill="#0B7A62"/>
+  <path d="M13 8h6v5h5v6h-5v5h-6v-5H8v-6h5z" fill="#FFFFFF"/>
+</svg>
+{%- endmacro %}
+
+{% macro check(clase="") -%}
+<svg class="icono {{ clase }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  <path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.6"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+{%- endmacro %}
+
+{% macro check_circulo(clase="") -%}
+<svg class="icono {{ clase }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  <circle cx="12" cy="12" r="11" fill="currentColor"/>
+  <path d="M7 12.4l3.2 3.2L17 8.8" fill="none" stroke="#FFFFFF" stroke-width="2.4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+{%- endmacro %}
+
+{% macro flecha(clase="") -%}
+<svg class="icono {{ clase }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  <path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+{%- endmacro %}
+
+{% macro flecha_izquierda(clase="") -%}
+<svg class="icono {{ clase }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  <path d="M19 12H6M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+{%- endmacro %}
+
+{% macro triangulo(clase="") -%}
+<svg class="icono {{ clase }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  <path d="M12 3.5L22 20.5H2z" fill="currentColor"/>
+  <path d="M12 9.5v5.2M12 17.6v.2" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
+{%- endmacro %}
+
+{% macro aspa(clase="") -%}
+<svg class="icono {{ clase }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  <circle cx="12" cy="12" r="11" fill="currentColor"/>
+  <path d="M8.2 8.2l7.6 7.6M15.8 8.2l-7.6 7.6" stroke="#FFFFFF" stroke-width="2.4"
+        stroke-linecap="round"/>
+</svg>
+{%- endmacro %}
+
+{% macro escudo(clase="") -%}
+<svg class="icono {{ clase }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  <path d="M12 2.5l8 3v6.2c0 4.8-3.3 8.4-8 9.8-4.7-1.4-8-5-8-9.8V5.5z" fill="currentColor"/>
+  <path d="M8.3 12.2l2.6 2.6 4.9-5" fill="none" stroke="#FFFFFF" stroke-width="2.2"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+{%- endmacro %}
+
+{% macro info(clase="") -%}
+<svg class="icono {{ clase }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  <circle cx="12" cy="12" r="11" fill="currentColor"/>
+  <path d="M12 11v6M12 7.4v.2" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+</svg>
+{%- endmacro %}

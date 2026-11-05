@@ -16,7 +16,7 @@ AVISO = "Prototipo académico: no reemplaza la consulta médica o farmacéutica.
 def _consultar(
     page: Page, servidor: str, medicamento: str, sintomas: list[str], condiciones: list[str]
 ) -> None:
-    page.goto(servidor)
+    page.goto(f"{servidor}/consulta/paso/1")
     expect(page.locator("#aviso")).to_have_text(AVISO)
     page.check(f'input[name="medicamento"][value="{medicamento}"]')
     for sintoma in sintomas:
@@ -102,7 +102,7 @@ def test_combinacion_no_cubierta(
 
 def test_escenario_6_responde_en_menos_de_2_segundos(page: Page, servidor: str) -> None:
     """SC-005: del envío del formulario a la aparición de #resultado, menos de 2 s."""
-    page.goto(servidor)
+    page.goto(f"{servidor}/consulta/paso/1")
     page.check('input[name="medicamento"][value="IBUPROFENO"]')
     page.check('input[name="sintomas"][value="DOLOR_CABEZA"]')
     page.check('input[name="sintomas"][value="FIEBRE"]')

@@ -15,6 +15,7 @@ from api.esquemas import (
     a_resultado_dto,
 )
 from application.casos_uso.evaluar_consulta import EvaluarConsulta
+from domain.base_conocimiento import BaseConocimiento
 from domain.errores import VocabularioInvalido
 from domain.vocabulario import Vocabulario
 
@@ -24,6 +25,7 @@ CABECERA_PERSISTIDA = "X-Consulta-Persistida"
 
 Plantillas = Annotated[Jinja2Templates, Depends(get_plantillas)]
 VocabularioDep = Annotated[Vocabulario, Depends(get_vocabulario)]
+BaseDep = Annotated[BaseConocimiento, Depends(get_base)]
 CasoDeUso = Annotated[EvaluarConsulta, Depends(get_evaluar_consulta)]
 
 
@@ -53,7 +55,34 @@ def _formulario(
     )
 
 
+def _enumerar(nombres: list[str]) -> str:
+    """Une nombres en español: «A», «A y B», «A, B y C» («e» ante sonido /i/)."""
+    if len(nombres) <= 1:
+        return "".join(nombres)
+    ultimo = nombres[-1]
+    conjuncion = "e" if ultimo.lower().startswith(("i", "hi")) else "y"
+    return f"{', '.join(nombres[:-1])} {conjuncion} {ultimo}"
+
+
 @router.get("/", response_class=HTMLResponse)
+def mostrar_portada(request: Request, plantillas: Plantillas, base: BaseDep) -> HTMLResponse:
+    """Muestra la portada con cifras reales de la base de conocimiento cargada."""
+    vocabulario = base.vocabulario
+    return plantillas.TemplateResponse(
+        request,
+        "portada.html",
+        {
+            "aviso": AVISO,
+            "num_reglas": len(base.reglas),
+            "medicamentos": _enumerar([m.nombre for m in vocabulario.medicamentos]),
+            "num_medicamentos": len(vocabulario.medicamentos),
+            "num_sintomas": len(vocabulario.sintomas),
+            "num_condiciones": len(vocabulario.condiciones),
+        },
+    )
+
+
+@router.get("/consulta/paso/1", response_class=HTMLResponse)
 def mostrar_formulario(
     request: Request, plantillas: Plantillas, vocabulario: VocabularioDep
 ) -> HTMLResponse:
