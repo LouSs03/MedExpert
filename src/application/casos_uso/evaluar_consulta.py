@@ -1,6 +1,8 @@
 """Caso de uso: evaluar una consulta de orientación (contracts/puertos.md)."""
 
+import logging
 from collections.abc import Sequence
+from uuid import UUID
 
 from application.ports.consulta_repository import ConsultaRepository
 from application.ports.motor_inferencia import MotorInferencia
@@ -13,6 +15,8 @@ from domain.mensajes_sistema import (
 )
 from domain.resolucion_nivel import EstrategiaResolucionNivel, Resolucion
 from domain.vocabulario import Medicamento, Vocabulario
+
+logger = logging.getLogger(__name__)
 
 
 class EvaluarConsulta:
@@ -42,7 +46,7 @@ class EvaluarConsulta:
         hechos = self._vocabulario.validar(medicamento, sintomas, condiciones)
         resolucion = self._estrategia.resolver(hechos, self._motor.evaluar(hechos))
         mensajes_sistema = self._mensajes_sistema(resolucion, hechos.medicamento)
-        consulta_id = self._consultas.guardar(
+        consulta_id = self._registrar(
             Consulta(
                 hechos=hechos,
                 nivel=resolucion.nivel,
@@ -56,9 +60,25 @@ class EvaluarConsulta:
             reglas_disparadas=resolucion.reglas_disparadas,
             sintomas_no_cubiertos=resolucion.sintomas_no_cubiertos,
             mensajes_sistema=mensajes_sistema,
-            persistida=True,
+            persistida=consulta_id is not None,
             consulta_id=consulta_id,
         )
+
+    def _registrar(self, consulta: Consulta) -> UUID | None:
+        """Guarda la consulta; si falla por un error técnico, lo registra y devuelve None.
+
+        Única excepción a la persistencia del Principio III (FR-019): el resultado se muestra
+        igual. El detalle del error va al log, donde FiltroSecretos lo sanea.
+        """
+        try:
+            return self._consultas.guardar(consulta)
+        except Exception as error:
+            logger.error(
+                "No se pudo persistir la consulta",
+                exc_info=True,
+                extra={"tipo_error": type(error).__name__},
+            )
+            return None
 
     def _mensajes_sistema(
         self, resolucion: Resolucion, medicamento: Medicamento
