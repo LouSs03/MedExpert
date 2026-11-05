@@ -4,7 +4,8 @@ El esquema lo administra la base (no la aplicación): aquí nunca se llama a `cr
 migraciones. Los nombres llevan el sufijo `Tabla` para no confundirlos con las entidades del
 dominio.
 
-Las columnas con valor por defecto en el servidor (`consulta.id`, `creado_en`) deben omitirse al
+Las columnas con valor por defecto en el servidor (`consulta.id`, `creado_en`) y las de
+identidad (`id` de catálogos, `regla` y `regla_mensaje`, GENERATED ALWAYS) deben omitirse al
 insertar, para que las genere la base.
 """
 
@@ -15,6 +16,7 @@ from sqlalchemy import (
     CheckConstraint,
     Date,
     DateTime,
+    Identity,
     SmallInteger,
     Text,
     UniqueConstraint,
@@ -29,9 +31,7 @@ class MedicamentoTabla(SQLModel, table=True):
 
     __tablename__ = "medicamento"
 
-    id: int = Field(
-        primary_key=True, sa_type=SmallInteger, sa_column_kwargs={"autoincrement": False}
-    )
+    id: int = Field(primary_key=True, sa_type=SmallInteger, sa_column_args=[Identity(always=True)])
     codigo: str = Field(sa_type=Text, unique=True)
     nombre: str = Field(sa_type=Text)
 
@@ -41,9 +41,7 @@ class SintomaTabla(SQLModel, table=True):
 
     __tablename__ = "sintoma"
 
-    id: int = Field(
-        primary_key=True, sa_type=SmallInteger, sa_column_kwargs={"autoincrement": False}
-    )
+    id: int = Field(primary_key=True, sa_type=SmallInteger, sa_column_args=[Identity(always=True)])
     codigo: str = Field(sa_type=Text, unique=True)
     nombre: str = Field(sa_type=Text)
 
@@ -53,9 +51,7 @@ class CondicionTabla(SQLModel, table=True):
 
     __tablename__ = "condicion"
 
-    id: int = Field(
-        primary_key=True, sa_type=SmallInteger, sa_column_kwargs={"autoincrement": False}
-    )
+    id: int = Field(primary_key=True, sa_type=SmallInteger, sa_column_args=[Identity(always=True)])
     codigo: str = Field(sa_type=Text, unique=True)
     nombre: str = Field(sa_type=Text)
     descripcion: str | None = Field(default=None, sa_type=Text)
@@ -75,7 +71,7 @@ class ReglaTabla(SQLModel, table=True):
         UniqueConstraint("codigo", "version", name="regla_codigo_version_key"),
     )
 
-    id: int = Field(primary_key=True, sa_column_kwargs={"autoincrement": False})
+    id: int = Field(primary_key=True, sa_column_args=[Identity(always=True)])
     codigo: str = Field(sa_type=Text)
     version: int = Field(sa_type=SmallInteger)
     medicamento_id: int = Field(foreign_key="medicamento.id", sa_type=SmallInteger)
@@ -120,7 +116,7 @@ class ReglaMensajeTabla(SQLModel, table=True):
         UniqueConstraint("regla_id", "orden", name="regla_mensaje_regla_id_orden_key"),
     )
 
-    id: int = Field(primary_key=True, sa_column_kwargs={"autoincrement": False})
+    id: int = Field(primary_key=True, sa_column_args=[Identity(always=True)])
     regla_id: int = Field(foreign_key="regla.id", ondelete="CASCADE")
     orden: int = Field(sa_type=SmallInteger)
     texto: str = Field(sa_type=Text)
