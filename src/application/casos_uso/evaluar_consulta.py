@@ -5,9 +5,14 @@ from collections.abc import Sequence
 from application.ports.consulta_repository import ConsultaRepository
 from application.ports.motor_inferencia import MotorInferencia
 from domain.consulta import Consulta, ResultadoEvaluacion
-from domain.mensajes_sistema import ConfiguracionSalvaguarda, mensaje_sintoma_no_cubierto
-from domain.resolucion_nivel import EstrategiaResolucionNivel
-from domain.vocabulario import Vocabulario
+from domain.mensajes_sistema import (
+    ConfiguracionSalvaguarda,
+    MensajeSistema,
+    mensaje_combinacion_no_cubierta,
+    mensaje_sintoma_no_cubierto,
+)
+from domain.resolucion_nivel import EstrategiaResolucionNivel, Resolucion
+from domain.vocabulario import Medicamento, Vocabulario
 
 
 class EvaluarConsulta:
@@ -36,10 +41,7 @@ class EvaluarConsulta:
         """Devuelve el resultado de la consulta; lanza VocabularioInvalido si los datos no valen."""
         hechos = self._vocabulario.validar(medicamento, sintomas, condiciones)
         resolucion = self._estrategia.resolver(hechos, self._motor.evaluar(hechos))
-        mensajes_sistema = tuple(
-            mensaje_sintoma_no_cubierto(sintoma, hechos.medicamento, self._salvaguarda)
-            for sintoma in resolucion.sintomas_no_cubiertos
-        )
+        mensajes_sistema = self._mensajes_sistema(resolucion, hechos.medicamento)
         consulta_id = self._consultas.guardar(
             Consulta(
                 hechos=hechos,
@@ -56,4 +58,15 @@ class EvaluarConsulta:
             mensajes_sistema=mensajes_sistema,
             persistida=True,
             consulta_id=consulta_id,
+        )
+
+    def _mensajes_sistema(
+        self, resolucion: Resolucion, medicamento: Medicamento
+    ) -> tuple[MensajeSistema, ...]:
+        """Devuelve los mensajes del sistema; nunca mezcla los dos tipos (FR-011, FR-020)."""
+        if resolucion.sin_regla:
+            return (mensaje_combinacion_no_cubierta(),)
+        return tuple(
+            mensaje_sintoma_no_cubierto(sintoma, medicamento, self._salvaguarda)
+            for sintoma in resolucion.sintomas_no_cubiertos
         )

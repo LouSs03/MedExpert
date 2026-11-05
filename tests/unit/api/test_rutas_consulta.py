@@ -246,7 +246,7 @@ def test_503_json_cuando_la_base_no_esta_disponible() -> None:
     assert salud.json() == {"base_conocimiento": "no_disponible"}
 
 
-def test_sin_regla_en_esta_fase_deriva_sin_reglas_aplicadas() -> None:
+def test_sin_regla_deriva_sin_reglas_aplicadas() -> None:
     respuesta = _cliente([]).post(
         "/api/v1/consultas", json={"medicamento": "IBUPROFENO", "sintomas": ["FIEBRE"]}
     )
