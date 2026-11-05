@@ -34,6 +34,20 @@ el sistema solo las lee, no las crea."
   igualmente el resultado (el Principio I prevalece sobre el III); registra el fallo en el log de
   la aplicación con el detalle del error, y la respuesta incluye una marca interna de que esa
   consulta no pudo persistirse.
+- Q: ¿Cuándo se dispara una regla si la persona marca más hechos de los que la regla pide? → A: Una
+  regla se dispara solo si todos sus síntomas y condiciones están presentes en la consulta; los
+  hechos adicionales no la bloquean. La marca "sin condiciones" de una regla significa "ninguna
+  condición marcada": esa regla no se dispara si la persona marcó cualquier condición.
+- Q: ¿Qué se muestra cuando se disparan varias reglas a la vez? → A: Todas, ordenadas por nivel más
+  severo, luego por especificidad (más síntomas y condiciones primero) y luego por código.
+- Q: ¿Qué ocurre si algún síntoma marcado no aparece en ninguna regla disparada? → A: Salvaguarda
+  de cobertura (Principio I): el nivel resultante es como mínimo Advertir, y por cada síntoma no
+  cubierto se muestra un mensaje genérico del sistema que indica que ese síntoma no tiene
+  orientación específica con ese medicamento y que consulte a un médico o farmacéutico. Ese mensaje
+  no es una regla de la base: lo define el sistema y queda marcado como pendiente de aprobación del
+  médico. No altera los 30 casos de aceptación.
+- Q: ¿Contra qué base de datos se ejecutan las pruebas de integración y de punta a punta? → A:
+  Contra una base separada (`TEST_DATABASE_URL`), nunca contra la base real.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -60,8 +74,13 @@ código aprobados para esa regla.
 2. **Given** una combinación que dispara varias reglas con niveles distintos, **When** la persona
    envía la consulta, **Then** el nivel mostrado es el más severo entre los disparados
    (Derivar al médico > Advertir > Orientar), y se muestran los mensajes y códigos de todas las
-   reglas disparadas.
-3. **Given** cualquier pantalla del sistema, **When** la persona la visualiza, **Then** ve un aviso
+   reglas disparadas, ordenados por nivel más severo, luego por especificidad y luego por código.
+3. **Given** una combinación en la que se dispara al menos una regla pero algún síntoma marcado no
+   aparece en ninguna de ellas (por ejemplo, ibuprofeno con dolor de cabeza y fiebre, donde solo se
+   dispara la regla del dolor de cabeza), **When** la persona envía la consulta, **Then** el nivel es
+   como mínimo Advertir, se muestran los mensajes de las reglas disparadas y, además, un mensaje del
+   sistema por cada síntoma no cubierto que recomienda consultar a un médico o farmacéutico.
+4. **Given** cualquier pantalla del sistema, **When** la persona la visualiza, **Then** ve un aviso
    de que se trata de un prototipo académico que no reemplaza la consulta médica o farmacéutica.
 
 ---
@@ -126,7 +145,18 @@ registro no contenga ningún campo de dato personal.
   medicamento inexistente): el sistema rechaza la consulta sin evaluarla y sin registrarla como
   consulta respondida.
 - **Varias reglas disparadas con distinto nivel**: se aplica el nivel más severo y se muestran todos
-  los mensajes y códigos disparados, sin duplicados.
+  los mensajes y códigos disparados, sin duplicados, ordenados por nivel más severo, luego por
+  especificidad y luego por código.
+- **Una regla general y otra más específica a la vez** (por ejemplo, paracetamol con dolor de cabeza
+  y fiebre: se disparan la regla de dolor de cabeza, la de fiebre y la de ambos): se muestran las
+  tres; la más específica aparece primero dentro de su nivel.
+- **Hechos adicionales a los de una regla**: no impiden que la regla se dispare, salvo que la regla
+  sea "sin condiciones" y la persona haya marcado alguna condición.
+- **Síntoma marcado que ninguna regla disparada cubre**: se aplica la salvaguarda de cobertura; el
+  nivel sube a Advertir si era Orientar (si ya era Advertir o Derivar al médico, se mantiene) y se
+  añade un mensaje del sistema por cada síntoma no cubierto.
+- **Ninguna regla disparada**: se aplica FR-011 (Derivar al médico y mensaje de combinación no
+  cubierta), no la salvaguarda de cobertura; los dos mensajes del sistema nunca aparecen juntos.
 - **Reglas en estado pendiente o versiones anteriores**: nunca participan en la evaluación, aunque
   sus condiciones coincidan con los hechos.
 - **Base de conocimiento no disponible o sin reglas aprobadas al iniciar**: el sistema no ofrece
@@ -138,7 +168,11 @@ registro no contenga ningún campo de dato personal.
 - **Consultas simultáneas de distintas personas**: los hechos de una consulta nunca influyen en el
   resultado de otra.
 - **Condiciones aparentemente irrelevantes para el medicamento elegido** (por ejemplo, uso de
-  aspirina con paracetamol): se evalúan igual; solo las reglas aprobadas deciden si tienen efecto.
+  aspirina con paracetamol): se evalúan igual. Marcarlas impide que se disparen las reglas "sin
+  condiciones"; si por eso no queda ninguna regla aplicable, el resultado es Derivar al médico
+  (FR-011).
+- **Pruebas automatizadas**: nunca escriben ni leen en la base real de consultas; usan una base
+  separada con la misma base de conocimiento.
 
 ## Requirements *(mandatory)*
 
@@ -156,20 +190,30 @@ registro no contenga ningún campo de dato personal.
   de las listas cerradas de FR-001, e informar a la persona qué debe corregir.
 - **FR-006**: El sistema DEBE evaluar los hechos de la consulta mediante encadenamiento hacia
   adelante, usando únicamente las reglas en estado aprobada y, de cada una, solo su versión más
-  reciente.
+  reciente. Una regla se dispara si y solo si: el medicamento de la consulta es el de la regla;
+  todos los síntomas de la regla están marcados; todas las condiciones de la regla están marcadas;
+  y, si la regla es "sin condiciones", no hay ninguna condición marcada. Los hechos adicionales no
+  impiden el disparo.
 - **FR-007**: El sistema DEBE devolver un único nivel resultante, que es uno de: Orientar,
   Advertir o Derivar al médico.
 - **FR-008**: Cuando se disparan varias reglas, el nivel resultante DEBE ser el más severo entre
-  ellas, según el orden Derivar al médico > Advertir > Orientar.
+  ellas, según el orden Derivar al médico > Advertir > Orientar, sujeto al mínimo que impone
+  FR-020.
 - **FR-009**: El sistema DEBE mostrar los mensajes de todas las reglas disparadas, tal como fueron
-  aprobados, sin alterarlos, resumirlos ni completarlos.
+  aprobados, sin alterarlos, resumirlos ni completarlos, ordenados por nivel de la regla (más severo
+  primero), luego por especificidad (mayor número de síntomas y condiciones primero) y luego por
+  código ascendente. El mismo orden se aplica a la lista de códigos y al registro de la consulta.
 - **FR-010**: El sistema DEBE mostrar, como explicación del razonamiento, la lista de códigos de las
-  reglas disparadas (R01–R30 o los códigos que se aprueben después).
+  reglas disparadas (R01–R30 o los códigos que se aprueben después) y, si se activó la salvaguarda
+  de FR-020, los síntomas no cubiertos, identificándola como salvaguarda del sistema y no como regla
+  de la base.
 - **FR-011**: Si ninguna regla se dispara, el sistema DEBE devolver el nivel "Derivar al médico", un
   mensaje que indique que la combinación no está cubierta por la base de conocimiento validada y una
   lista de reglas aplicadas vacía.
 - **FR-012**: El sistema NO DEBE mostrar ninguna recomendación, dosis ni mensaje clínico que no
-  provenga de una regla aprobada, salvo el mensaje de combinación no cubierta de FR-011.
+  provenga de una regla aprobada, salvo dos mensajes del sistema: el de combinación no cubierta
+  (FR-011) y el de síntoma no cubierto (FR-020). Ambos solo remiten a un profesional y no
+  contienen recomendaciones de uso.
 - **FR-013**: Toda pantalla DEBE mostrar un aviso visible de que el sistema es un prototipo
   académico que no reemplaza la consulta médica o farmacéutica.
 - **FR-014**: El sistema DEBE registrar cada consulta respondida con: medicamento, síntomas,
@@ -187,6 +231,17 @@ registro no contenga ningún campo de dato personal.
   detalle del error (sin credenciales ni cadenas de conexión, según el Principio X) y la respuesta
   DEBE incluir una marca interna que indique que esa consulta no pudo persistirse. La marca no se
   presenta como mensaje clínico ni altera el nivel, los mensajes o los códigos mostrados.
+- **FR-020**: Salvaguarda de cobertura. Si se disparó al menos una regla y algún síntoma marcado no
+  aparece entre los síntomas de ninguna regla disparada, el sistema DEBE (a) elevar el nivel
+  resultante a Advertir cuando el nivel de las reglas sea Orientar, sin rebajarlo nunca si ya es
+  Advertir o Derivar al médico; y (b) mostrar, después de los mensajes de las reglas, un mensaje del
+  sistema por cada síntoma no cubierto, que nombre el síntoma y el medicamento, indique que no tiene
+  orientación específica y recomiende consultar a un médico o farmacéutico. El texto de ese mensaje
+  lo define el sistema, no forma parte de la base de conocimiento y DEBE quedar identificado como
+  pendiente de aprobación del médico especialista hasta que este lo valide.
+- **FR-021**: Las pruebas automatizadas de integración y de punta a punta DEBEN ejecutarse contra
+  una base de datos separada de la real, con el mismo esquema y la misma base de conocimiento;
+  nunca DEBEN leer ni escribir en la base real de consultas.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -204,19 +259,24 @@ registro no contenga ningún campo de dato personal.
   de menor a mayor severidad.
 - **Consulta**: registro anónimo de una evaluación: sus hechos de entrada, el nivel resultante, las
   reglas disparadas (código y versión) y la fecha y hora.
-- **Resultado**: lo que se muestra a la persona: nivel, mensajes de las reglas disparadas y lista de
-  códigos aplicados.
+- **Resultado**: lo que se muestra a la persona: nivel, mensajes de las reglas disparadas en el orden
+  de FR-009, lista de códigos aplicados y, si corresponde, los mensajes del sistema (combinación no
+  cubierta o síntoma no cubierto).
+- **Mensaje del sistema**: texto que no proviene de una regla de la base y que solo remite a un
+  profesional. Hay dos tipos: combinación no cubierta (FR-011) y síntoma no cubierto (FR-020); este
+  último está pendiente de aprobación del médico especialista.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
 - **SC-001**: Para el 100% de las 30 reglas aprobadas, una consulta con los hechos exactos de la
-  regla devuelve el nivel y los mensajes aprobados para ella.
+  regla devuelve el nivel y los mensajes aprobados para ella, y en ninguno de esos 30 casos se
+  activa la salvaguarda de cobertura.
 - **SC-002**: El 100% de las combinaciones no cubiertas por ninguna regla aprobada devuelven
   "Derivar al médico" con el mensaje de combinación no cubierta.
-- **SC-003**: El 0% de los resultados mostrados contiene un mensaje clínico sin código de regla
-  aprobada que lo respalde (excepto el mensaje de combinación no cubierta).
+- **SC-003**: El 0% de los resultados mostrados contiene un mensaje sin código de regla aprobada que
+  lo respalde, excepto los dos mensajes del sistema de FR-011 y FR-020.
 - **SC-004**: Una persona sin entrenamiento previo completa una consulta, desde abrir el formulario
   hasta ver el resultado, en menos de 1 minuto.
 - **SC-005**: El resultado aparece en menos de 2 segundos después de enviar la consulta.
@@ -226,6 +286,13 @@ registro no contenga ningún campo de dato personal.
 - **SC-007**: El 100% de las pantallas muestran el aviso de prototipo académico.
 - **SC-008**: Con 20 consultas simultáneas distintas, cada una obtiene exactamente el mismo
   resultado que obtendría si se enviara sola.
+- **SC-009**: En el 100% de las consultas en que algún síntoma marcado no queda cubierto por las
+  reglas disparadas, el nivel resultante es Advertir o Derivar al médico y aparece un mensaje de
+  síntoma no cubierto por cada síntoma afectado; el 0% de esas consultas termina en Orientar.
+- **SC-010**: Para la misma combinación de hechos, el orden de mensajes y códigos mostrado es
+  idéntico en el 100% de las repeticiones.
+- **SC-011**: Tras ejecutar la suite completa de pruebas, la base real de consultas no contiene
+  ningún registro nuevo (0 registros creados por pruebas).
 
 ## Assumptions
 
@@ -244,6 +311,14 @@ registro no contenga ningún campo de dato personal.
 - Si el registro de una consulta falla, se prefiere mostrar el resultado aunque quede sin
   persistir: ante un conflicto, la seguridad del paciente (Principio I) prevalece sobre la
   trazabilidad (Principio III), y el fallo queda documentado en el log.
+- La activación de la salvaguarda de cobertura no necesita un dato nuevo en el registro: se puede
+  reconstruir a partir de los síntomas registrados y las versiones de las reglas disparadas. El
+  registro guarda el nivel ya elevado.
+- El texto del mensaje de síntoma no cubierto es provisional mientras el médico especialista no lo
+  apruebe; su aprobación queda fuera de esta funcionalidad, y su identificación como "pendiente de
+  aprobación" se mantiene visible en la explicación del resultado hasta entonces.
+- La salvaguarda de cobertura se aplica solo a síntomas; las condiciones marcadas que ninguna regla
+  disparada considera no la activan.
 - Fuera de alcance: autenticación de usuarios, panel de administración de reglas, medicamentos
   distintos de paracetamol e ibuprofeno, y consulta del historial de consultas por parte de las
   personas usuarias.
