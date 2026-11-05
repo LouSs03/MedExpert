@@ -243,3 +243,19 @@ casos:
     nivel_esperado: DERIVAR
     reglas_esperadas: [R30]
     salvaguarda: false
+
+# Combinaciones que ninguna regla aprobada cubre (US2, FR-011, SC-002): Derivar al médico con el
+# único mensaje de combinación no cubierta. Verificadas con el oráculo sobre las reglas reales.
+no_cubiertos:
+  - id: ibuprofeno-fiebre
+    medicamento: IBUPROFENO
+    sintomas: [FIEBRE]
+    condiciones: []
+    nivel_esperado: DERIVAR
+    sin_regla: true
+  - id: paracetamol-dolor-cabeza-aspirina
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_CABEZA]
+    condiciones: [USO_ASPIRINA]
+    nivel_esperado: DERIVAR
+    sin_regla: true

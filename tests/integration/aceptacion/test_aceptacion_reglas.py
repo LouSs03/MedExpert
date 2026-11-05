@@ -15,7 +15,11 @@ from sqlalchemy import Engine, text
 from application.casos_uso.cargar_base_conocimiento import CargarBaseConocimiento
 from application.casos_uso.evaluar_consulta import EvaluarConsulta
 from domain.base_conocimiento import BaseConocimiento
-from domain.mensajes_sistema import ConfiguracionSalvaguarda
+from domain.mensajes_sistema import (
+    TEXTO_COMBINACION_NO_CUBIERTA,
+    ConfiguracionSalvaguarda,
+    TipoMensajeSistema,
+)
 from domain.nivel import Nivel
 from domain.resolucion_nivel import ResolucionPorSeveridad
 from fakes.repositorios import ConsultaRepositoryEnMemoria
@@ -25,9 +29,11 @@ from infrastructure.inference.fabrica_entorno import FabricaEntornoClips
 
 pytestmark = pytest.mark.aceptacion
 
-CASOS: list[dict[str, Any]] = yaml.safe_load(
+BIBLIOTECA: dict[str, Any] = yaml.safe_load(
     (Path(__file__).parent / "casos_reglas.yaml").read_text(encoding="utf-8")
-)["casos"]
+)
+CASOS: list[dict[str, Any]] = BIBLIOTECA["casos"]
+NO_CUBIERTOS: list[dict[str, Any]] = BIBLIOTECA["no_cubiertos"]
 
 
 @pytest.fixture(scope="module")
@@ -72,3 +78,15 @@ def test_caso_de_aceptacion(
         )
     assert aprobados
     assert list(propia.mensajes) == aprobados
+
+
+@pytest.mark.parametrize("caso", NO_CUBIERTOS, ids=[c["id"] for c in NO_CUBIERTOS])
+def test_combinacion_no_cubierta(caso: dict[str, Any], evaluar: EvaluarConsulta) -> None:
+    resultado = evaluar.ejecutar(caso["medicamento"], caso["sintomas"], caso["condiciones"])
+
+    assert resultado.nivel is Nivel(caso["nivel_esperado"])
+    assert resultado.sin_regla is caso["sin_regla"]
+    assert resultado.reglas_disparadas == ()
+    (mensaje,) = resultado.mensajes_sistema
+    assert mensaje.tipo is TipoMensajeSistema.COMBINACION_NO_CUBIERTA
+    assert mensaje.texto == TEXTO_COMBINACION_NO_CUBIERTA
