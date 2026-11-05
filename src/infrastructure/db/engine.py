@@ -5,6 +5,9 @@ from collections.abc import Iterator
 from sqlalchemy import URL, Engine
 from sqlmodel import Session, create_engine
 
+Sesion = Session
+"""Tipo de la sesión de base de datos, para anotar dependencias fuera de `infrastructure/db`."""
+
 
 def crear_engine(database_url: str | URL) -> Engine:
     """Crea el engine de la base de datos.
