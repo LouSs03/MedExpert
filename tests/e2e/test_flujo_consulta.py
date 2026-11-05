@@ -3,6 +3,8 @@
 Escenarios 1, 2, 3, 6, 8 y 9 de quickstart.md, contra la base de pruebas.
 """
 
+import time
+
 import pytest
 from playwright.sync_api import Page, expect
 
@@ -96,3 +98,18 @@ def test_combinacion_no_cubierta(
     expect(sistema.locator(".distintivo-pendiente")).to_have_count(0)
     expect(page.locator("#explicacion")).to_contain_text("Ninguna regla aplicada")
     expect(page.locator("#explicacion")).not_to_contain_text("Salvaguarda del sistema")
+
+
+def test_escenario_6_responde_en_menos_de_2_segundos(page: Page, servidor: str) -> None:
+    """SC-005: del envío del formulario a la aparición de #resultado, menos de 2 s."""
+    page.goto(servidor)
+    page.check('input[name="medicamento"][value="IBUPROFENO"]')
+    page.check('input[name="sintomas"][value="DOLOR_CABEZA"]')
+    page.check('input[name="sintomas"][value="FIEBRE"]')
+
+    inicio = time.perf_counter()
+    page.click('button[type="submit"]')
+    page.wait_for_selector("#resultado", state="visible")
+    transcurrido = time.perf_counter() - inicio
+
+    assert transcurrido < 2.0, f"{transcurrido:.2f} s"
