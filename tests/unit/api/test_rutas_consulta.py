@@ -47,17 +47,33 @@ def _texto(html: str) -> str:
 
 
 def test_formulario_muestra_el_vocabulario_y_el_aviso() -> None:
-    respuesta = _cliente().get("/consulta/paso/1")
+    """Los tres pasos muestran, entre todos, el vocabulario completo y el aviso."""
+    cliente = _cliente()
+    pasos = {
+        "medicamento": (cliente.get("/consulta/paso/1"), VOCABULARIO.medicamentos),
+        "sintomas": (
+            cliente.get("/consulta/paso/2", params={"medicamento": "PARACETAMOL"}),
+            VOCABULARIO.sintomas,
+        ),
+        "condiciones": (
+            cliente.get(
+                "/consulta/paso/3", params={"medicamento": "PARACETAMOL", "sintomas": ["FIEBRE"]}
+            ),
+            VOCABULARIO.condiciones,
+        ),
+    }
 
-    assert respuesta.status_code == 200
-    html = respuesta.text
-    assert AVISO in html
-    assert html.count('name="medicamento"') == 2
-    assert html.count('name="sintomas"') == 6
-    assert html.count('name="condiciones"') == 7
-    for termino in (*VOCABULARIO.medicamentos, *VOCABULARIO.sintomas, *VOCABULARIO.condiciones):
-        assert f'value="{termino.codigo}"' in html
-    assert "Adulto mayor (60 años o más)" in html
+    for campo, (respuesta, terminos) in pasos.items():
+        assert respuesta.status_code == 200
+        html = respuesta.text
+        assert AVISO in html
+        assert html.count(f'data-opcion="{campo}"') == len(terminos)
+        for termino in terminos:
+            assert f'data-valor="{termino.codigo}"' in html
+    assert len(VOCABULARIO.medicamentos) == 2
+    assert len(VOCABULARIO.sintomas) == 6
+    assert len(VOCABULARIO.condiciones) == 7
+    assert "Adulto mayor (60 años o más)" in pasos["condiciones"][0].text
 
 
 def test_resultado_html_con_mensajes_agrupados_en_orden() -> None:
@@ -128,9 +144,10 @@ def test_formulario_422_con_errores_y_valores_marcados() -> None:
     html = respuesta.text
     assert AVISO in html
     assert "Debe marcar al menos un síntoma." in _texto(html)
-    assert re.search(r'value="PARACETAMOL"[^>]*checked', html)
-    assert re.search(r'value="EMBARAZO"[^>]*checked', html)
-    assert not re.search(r'value="IBUPROFENO"[^>]*checked', html)
+    # Lo elegido se conserva (viaja en campos ocultos entre pasos); lo no elegido, no.
+    assert '<input type="hidden" name="medicamento" value="PARACETAMOL">' in html
+    assert '<input type="hidden" name="condiciones" value="EMBARAZO">' in html
+    assert 'name="medicamento" value="IBUPROFENO"' not in html
 
 
 def test_api_json_resultado_dto() -> None:
