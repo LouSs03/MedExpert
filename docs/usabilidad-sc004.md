@@ -3,7 +3,8 @@
 **Objetivo (SC-004)**: una persona sin entrenamiento previo completa una consulta, desde abrir el
 formulario hasta ver el resultado, en **menos de 1 minuto**.
 
-**Estado**: pendiente. Esta plantilla se completa al realizar la prueba (tarea T078).
+**Estado**: prueba realizada; la medición se hará con la ficha de observación en un proceso
+posterior. Esta plantilla puede usarse para registrar los tiempos (tarea T078).
 
 ## Preparación
 

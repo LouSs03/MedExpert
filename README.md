@@ -225,6 +225,6 @@ Conviene tenerlas presentes al evaluar o presentar el sistema:
   correcta.
 - **Alcance reducido**: dos medicamentos, interfaz solo en español, sin cuentas de usuario y sin
   historial de consultas visible para la persona.
-- **Usabilidad sin medir todavía**: el objetivo de completar una consulta en menos de un minuto
-  (SC-004) está pendiente de una prueba con personas
-  ([docs/usabilidad-sc004.md](docs/usabilidad-sc004.md)).
+- **Usabilidad sin medir todavía**: la prueba de usabilidad ya se realizó, pero la medición del
+  objetivo de completar una consulta en menos de un minuto (SC-004) se hará con la ficha de
+  observación en un proceso posterior ([docs/usabilidad-sc004.md](docs/usabilidad-sc004.md)).
