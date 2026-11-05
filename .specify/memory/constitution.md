@@ -1,5 +1,3 @@
-
-
 # Constitución de MedExpert
 
 Sistema experto basado en reglas para la orientación preventiva sobre automedicación en Perú
@@ -13,8 +11,16 @@ Sistema experto basado en reglas para la orientación preventiva sobre automedic
 - Toda pantalla DEBE mostrar un aviso visible de que se trata de un prototipo académico que no
   reemplaza la consulta médica o farmacéutica.
 - Si ninguna regla aprobada se dispara, la respuesta DEBE ser "Derivar al médico".
-- El sistema NO DEBE inventar, inferir ni completar ninguna recomendación que no provenga
-  literalmente de una regla aprobada.
+- Se autoriza UNA segunda excepción: un mensaje del sistema de **salvaguarda de cobertura** cuando
+  algún síntoma marcado no está cubierto por las reglas disparadas. Condiciones:
+  - (a) solo puede remitir al usuario a un médico o farmacéutico, sin indicar dosis, medicamentos
+    ni recomendaciones clínicas;
+  - (b) su texto y su activación DEBEN estar definidos en la especificación;
+  - (c) mientras el médico especialista no lo apruebe, DEBE mostrarse marcado como "pendiente de
+    aprobación";
+  - (d) cualquier otro texto que no provenga de una regla aprobada sigue prohibido.
+- Fuera de estas dos excepciones, el sistema NO DEBE inventar, inferir ni completar ninguna
+  recomendación que no provenga literalmente de una regla aprobada.
 
 **Justificación**: un consejo erróneo sobre automedicación puede causar daño real; ante la duda,
 la única salida segura es derivar a un profesional.
@@ -27,6 +33,10 @@ la única salida segura es derivar a un profesional.
   solo su versión más reciente.
 - Ninguna recomendación puede mostrarse si no proviene de una regla validada por el médico
   especialista.
+- Las únicas excepciones son los dos mensajes del sistema autorizados en el Principio I ("Derivar
+  al médico" cuando ninguna regla aplica y la salvaguarda de cobertura). No son reglas ni
+  recomendaciones, por lo que su texto puede definirse en el sistema, siempre conforme a la
+  especificación y a las condiciones del Principio I.
 
 **Justificación**: el conocimiento clínico lo valida el especialista, no el programador; separarlo
 permite revisarlo, versionarlo y auditarlo sin tocar el código.
@@ -162,7 +172,8 @@ evita que un cambio silencioso altere recomendaciones ya validadas.
 
 ## Restricciones Técnicas y Stack
 
-- Lenguaje: Python 3.12.
+- Lenguaje: Python 3.12 o superior (verificado con 3.13). El despliegue DEBE fijar la versión
+  explícitamente.
 - API y presentación: FastAPI con plantillas Jinja2; esquemas de entrada/salida en Pydantic.
 - Motor de inferencia: CLIPS mediante clipspy, confinado a `src/infrastructure/inference/`.
 - Persistencia: SQLModel sobre PostgreSQL alojado en Supabase, confinado a
@@ -205,4 +216,4 @@ Todo pull request hacia `main` DEBE superar, como mínimo, estas puertas:
   excepción DEBE justificarse por escrito en el plan y aprobarse antes de implementarse; las
   violaciones de los Principios I, II y IV no admiten excepción.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04
+**Version**: 1.1.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04
