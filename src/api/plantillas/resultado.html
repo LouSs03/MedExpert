@@ -3,7 +3,7 @@
 {% block contenido %}
 {% set r = resultado %}
 {% set pendientes = r.mensajes_sistema | selectattr("pendiente_aprobacion") | list %}
-<section id="resultado" data-nivel="{{ r.nivel }}" data-salvaguarda="{{ 'true' if r.salvaguarda_activada else 'false' }}" class="resultado nivel-{{ r.nivel | lower }}">
+<section id="resultado" data-nivel="{{ r.nivel }}" data-salvaguarda="{{ 'true' if r.salvaguarda_activada else 'false' }}" data-consulta-persistida="{{ 'true' if r.persistida else 'false' }}" class="resultado nivel-{{ r.nivel | lower }}">
   <h1 class="nivel">
     <span class="nivel-icono" aria-hidden="true">{% if r.nivel == "DERIVAR" %}⛔{% elif r.nivel == "ADVERTIR" %}⚠{% else %}ℹ{% endif %}</span>
     <span id="nivel">{{ r.nivel_etiqueta }}</span>

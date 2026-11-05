@@ -20,9 +20,16 @@ from domain.vocabulario import Vocabulario
 
 router = APIRouter(dependencies=[Depends(get_base)])
 
+CABECERA_PERSISTIDA = "X-Consulta-Persistida"
+
 Plantillas = Annotated[Jinja2Templates, Depends(get_plantillas)]
 VocabularioDep = Annotated[Vocabulario, Depends(get_vocabulario)]
 CasoDeUso = Annotated[EvaluarConsulta, Depends(get_evaluar_consulta)]
+
+
+def _marcar_persistencia(respuesta: Response, persistida: bool) -> None:
+    """Añade la marca interna de persistencia (FR-019); no se muestra como texto."""
+    respuesta.headers[CABECERA_PERSISTIDA] = "true" if persistida else "false"
 
 
 def _formulario(
@@ -74,9 +81,11 @@ def consultar_formulario(
             "condiciones": condiciones or [],
         }
         return _formulario(request, plantillas, vocabulario, seleccion, error.problemas, 422)
-    return plantillas.TemplateResponse(
+    respuesta = plantillas.TemplateResponse(
         request, "resultado.html", {"aviso": AVISO, "resultado": a_resultado_dto(resultado)}
     )
+    _marcar_persistencia(respuesta, resultado.persistida)
+    return respuesta
 
 
 @router.post(
@@ -84,7 +93,9 @@ def consultar_formulario(
     response_model=ResultadoDTO,
     responses={422: {"model": ErrorValidacionDTO}},
 )
-def consultar_api(entrada: ConsultaEntradaDTO, caso: CasoDeUso) -> Response | ResultadoDTO:
+def consultar_api(
+    entrada: ConsultaEntradaDTO, caso: CasoDeUso, respuesta: Response
+) -> Response | ResultadoDTO:
     """Evalúa una consulta en JSON y devuelve el ResultadoDTO."""
     try:
         resultado = caso.ejecutar(entrada.medicamento, entrada.sintomas, entrada.condiciones)
@@ -94,4 +105,5 @@ def consultar_api(entrada: ConsultaEntradaDTO, caso: CasoDeUso) -> Response | Re
             valores_rechazados=list(error.valores_rechazados),
         )
         return JSONResponse(status_code=422, content=cuerpo.model_dump())
+    _marcar_persistencia(respuesta, resultado.persistida)
     return a_resultado_dto(resultado)
