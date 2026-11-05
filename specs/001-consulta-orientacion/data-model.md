@@ -116,7 +116,7 @@ regla, Principios I y II):
   cubierta por la base de conocimiento validada. Consulte con un médico."*
 - `SINTOMA_NO_CUBIERTO`: *"«{sintoma.nombre}» no tiene orientación específica con
   {medicamento.nombre} en la base de conocimiento validada. Consulte a un médico o
-  farmacéutico."* El texto literal debe copiarse a FR-020 antes de implementar (research P6).
+  farmacéutico."* Es el mismo texto literal que fija FR-020 de la spec (Principio I (b)).
 
 ### ConfiguracionSalvaguarda
 

@@ -118,7 +118,9 @@ resuelve la versión de Python (D13), los adaptadores de persistencia pasan a ll
   salvaguarda; `consulta_regla_disparada.regla_id` apunta a la versión concreta y `orden` sigue
   D2. La activación de la salvaguarda no tiene columna propia: se reconstruye a partir de los
   síntomas y las versiones de las reglas registradas (supuesto de la spec). Si la inserción falla:
-  `logger.error` saneado y `persistida = False`.
+  `logger.error(..., exc_info=True)`, cuyo mensaje y traza los sanea el filtro de D8, y
+  `persistida = False`. Es la única excepción a la persistencia que admite el Principio III
+  (constitución v1.2.0).
 - **Rationale**: clarificación de FR-019; esquema existente sin cambios.
 - **Alternatives considered**: añadir columnas `sintomas_no_cubiertos` o `salvaguarda`. Se
   descarta porque la funcionalidad no altera el esquema (FR-017 y Assumptions).
@@ -200,8 +202,10 @@ resuelve la versión de Python (D13), los adaptadores de persistencia pasan a ll
   - La marca `pendiente_aprobacion` del mensaje `SINTOMA_NO_CUBIERTO` se toma de la variable de
     entorno `SALVAGUARDA_PENDIENTE_APROBACION` (valores `true`/`false`, por defecto `true`;
     cualquier otro valor hace fallar el arranque). `infrastructure/config.py` la lee y se inyecta
-    en `EvaluarConsulta` como `ConfiguracionSalvaguarda`. Con `true`, el resultado muestra la
-    etiqueta "Mensaje del sistema — pendiente de aprobación médica" (condición (c)). Cambiarla a
+    en `EvaluarConsulta` como `ConfiguracionSalvaguarda`. Los mensajes del sistema se muestran
+    bajo el encabezado "Mensaje del sistema (no proviene de una regla validada)"; con `true`, se
+    añade además el distintivo aparte "Pendiente de aprobación médica" (condición (c);
+    [contracts/http.md](contracts/http.md)). Cambiarla a
     `false` solo está permitido después de que el médico apruebe el texto, y se documenta en el
     commit que cambia la configuración de despliegue.
   - `COMBINACION_NO_CUBIERTA` tiene `pendiente_aprobacion = False`, porque lo autoriza
@@ -210,9 +214,7 @@ resuelve la versión de Python (D13), los adaptadores de persistencia pasan a ll
     configurables.
 - **Rationale**: cumple el Principio I (a), (c) y (d) y el pedido de que la marca sea
   configurable sin tocar el código.
-- **Pendiente (b)**: el Principio I (b) exige que el **texto** esté definido en la
-  especificación. FR-020 describe su contenido, pero no el texto literal. Antes de implementar hay
-  que copiar el texto de arriba (o el que se elija) en FR-020 (ver P6).
+- **Principio I (b)**: el texto literal de arriba está fijado en FR-020 de la spec (P6 resuelto).
 
 ### D15. Nombre de los adaptadores de persistencia
 
@@ -221,10 +223,8 @@ resuelve la versión de Python (D13), los adaptadores de persistencia pasan a ll
 - **Rationale**: los adaptadores dependen de PostgreSQL a través de SQLModel, no de ninguna API
   propia de Supabase. Funcionarían igual con PostgreSQL local o con otro proveedor, como la base
   de pruebas de D12.
-- **Conflicto**: los Principios IV y V de la constitución v1.1.0 nombran literalmente
-  `SupabaseReglaRepository`, y la gobernanza dice que las violaciones del Principio IV no admiten
-  excepción. Hace falta una enmienda de la constitución antes de implementar (ver P7 y el
-  Constitution Check del plan).
+- **Constitución**: desde la v1.1.1, los Principios IV y V nombran `PostgresReglaRepository` y
+  `PostgresConsultaRepository` (P7 resuelto).
 
 ## Pendientes
 
@@ -236,11 +236,9 @@ resuelve la versión de Python (D13), los adaptadores de persistencia pasan a ll
 - **P4 — Python 3.12**: ✅ resuelto con la constitución v1.1.0 (D13).
 - **P5 — Metadatos de aprobación**: `aprobada_por` y `fecha_aprobacion` siguen vacíos en las 30
   reglas. No bloquea esta funcionalidad, pero debilita la trazabilidad de la aprobación.
-- **P6 — Texto literal de la salvaguarda en la spec (bloqueante para implementar)**: Principio I
-  (b). Hay que añadir el texto de D14 a FR-020.
-- **P7 — Nombres de los adaptadores en la constitución (bloqueante para implementar)**: hay que
-  enmendar los Principios IV y V para que digan `PostgresReglaRepository` (D15). Se propone PATCH,
-  porque no cambia la arquitectura, solo el nombre del adaptador.
+- **P6 — Texto literal de la salvaguarda en la spec**: ✅ resuelto; el texto de D14 está en FR-020.
+- **P7 — Nombres de los adaptadores en la constitución**: ✅ resuelto con la constitución v1.1.1
+  (D15).
 - **P8 — Base de pruebas**: crear la base separada (proyecto o branch de Supabase, o PostgreSQL
   local) con el esquema y las 30 reglas, y definir `TEST_DATABASE_URL`. Bloquea ejecutar las
   suites `integration`, `aceptacion` y `e2e`, pero no escribirlas.

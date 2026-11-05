@@ -55,7 +55,7 @@ Resultado esperado: el mismo número antes y después.
 ## Ejecutar la aplicación
 
 ```bash
-uvicorn api.main:app --app-dir src --reload
+uvicorn api.main:create_app --factory --app-dir src --reload
 ```
 
 - `GET http://127.0.0.1:8000/salud` → `{"base_conocimiento": "disponible", "reglas": 30}`.
@@ -86,7 +86,7 @@ En cada escenario hay que comprobar:
 - Escenarios 6 y 7: después de los mensajes de las reglas aparece el bloque "Mensaje del sistema"
   con *"«Fiebre» no tiene orientación específica con Ibuprofeno…"* (o con «Dolor dental» y
   Paracetamol), el distintivo **"Pendiente de aprobación médica"** y, en la explicación,
-  "Salvaguarda del sistema: síntomas sin regla aplicable: …". En el JSON:
+  "Salvaguarda del sistema (pendiente de aprobación médica): síntomas sin regla aplicable: …". En el JSON:
   `salvaguarda_activada: true`, `sintomas_no_cubiertos` y `mensajes_sistema[].pendiente_aprobacion: true`.
 - Con `SALVAGUARDA_PENDIENTE_APROBACION=false` y la aplicación reiniciada, el escenario 6 da el
   mismo nivel y el mismo mensaje, sin el distintivo y con `pendiente_aprobacion: false`.

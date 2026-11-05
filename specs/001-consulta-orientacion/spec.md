@@ -31,7 +31,7 @@ el sistema solo las lee, no las crea."
 ### Session 2026-11-04
 
 - Q: ¿Qué debe hacer el sistema si una consulta ya evaluada no puede registrarse? → A: Muestra
-  igualmente el resultado (el Principio I prevalece sobre el III); registra el fallo en el log de
+  igualmente el resultado (excepción por fallo técnico del Principio III); registra el fallo en el log de
   la aplicación con el detalle del error, y la respuesta incluye una marca interna de que esa
   consulta no pudo persistirse.
 - Q: ¿Cuándo se dispara una regla si la persona marca más hechos de los que la regla pide? → A: Una
@@ -238,7 +238,10 @@ registro no contenga ningún campo de dato personal.
   sistema por cada síntoma no cubierto, que nombre el síntoma y el medicamento, indique que no tiene
   orientación específica y recomiende consultar a un médico o farmacéutico. El texto de ese mensaje
   lo define el sistema, no forma parte de la base de conocimiento y DEBE quedar identificado como
-  pendiente de aprobación del médico especialista hasta que este lo valide.
+  pendiente de aprobación del médico especialista hasta que este lo valide. Texto literal, donde
+  `{sintoma.nombre}` y `{medicamento.nombre}` son los nombres visibles del síntoma y del
+  medicamento: *"«{sintoma.nombre}» no tiene orientación específica con {medicamento.nombre} en la
+  base de conocimiento validada. Consulte a un médico o farmacéutico."*
 - **FR-021**: Las pruebas automatizadas de integración y de punta a punta DEBEN ejecutarse contra
   una base de datos separada de la real, con el mismo esquema y la misma base de conocimiento;
   nunca DEBEN leer ni escribir en la base real de consultas.
@@ -253,7 +256,7 @@ registro no contenga ningún campo de dato personal.
 - **Hecho**: cada dato de entrada de una consulta (el medicamento, cada síntoma y cada condición)
   sobre el que razonan las reglas.
 - **Regla**: conocimiento validado por el médico especialista. Tiene un código (R01–R30), una
-  versión, un estado (pendiente o aprobada), las condiciones sobre hechos que la disparan, el nivel
+  versión, un estado (pendiente, aprobada o rechazada), las condiciones sobre hechos que la disparan, el nivel
   que asigna y el mensaje que muestra.
 - **Nivel**: grado de orientación del resultado: Orientar, Advertir o Derivar al médico, ordenados
   de menor a mayor severidad.
@@ -309,8 +312,8 @@ registro no contenga ningún campo de dato personal.
 - El resultado es informativo: el sistema no indica dosis, frecuencias ni duración de tratamiento,
   salvo que ese contenido forme parte literal de un mensaje aprobado.
 - Si el registro de una consulta falla, se prefiere mostrar el resultado aunque quede sin
-  persistir: ante un conflicto, la seguridad del paciente (Principio I) prevalece sobre la
-  trazabilidad (Principio III), y el fallo queda documentado en el log.
+  persistir, conforme a la excepción por fallo técnico del Principio III, y el fallo queda
+  documentado en el log.
 - La activación de la salvaguarda de cobertura no necesita un dato nuevo en el registro: se puede
   reconstruir a partir de los síntomas registrados y las versiones de las reglas disparadas. El
   registro guarda el nivel ya elevado.

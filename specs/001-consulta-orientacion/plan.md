@@ -56,22 +56,22 @@ conocimiento de solo lectura (FR-017); las pruebas nunca tocan la base real (FR-
 **Scale/Scope**: prototipo de tesis: 2 medicamentos, 6 síntomas, 7 condiciones, 30 reglas
 (16.128 combinaciones posibles); 20 consultas simultáneas (SC-008); 5 pantallas o estados
 
-No quedan NEEDS CLARIFICATION. Los pendientes P3, P5, P6, P7 y P8 de [research.md](research.md)
+No quedan NEEDS CLARIFICATION. Los pendientes P3, P5 y P8 de [research.md](research.md)
 son acciones del usuario, no incógnitas técnicas.
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Contra la constitución **v1.1.0**.
+Contra la constitución **v1.2.0**.
 
 | # | Principio | Cómo lo cumple el diseño | Estado |
 |---|-----------|--------------------------|--------|
-| I | Seguridad del paciente | Aviso en `base.html`; solo dos mensajes del sistema: `COMBINACION_NO_CUBIERTA` y `SINTOMA_NO_CUBIERTO`. El segundo (a) solo remite a médico o farmacéutico; (c) se muestra "pendiente de aprobación médica" mientras `SALVAGUARDA_PENDIENTE_APROBACION=true`; (d) ningún otro texto fuera de las reglas. La salvaguarda nunca rebaja el nivel ni es desactivable | ⚠ (b): falta el texto **literal** del mensaje en FR-020 (P6) |
+| I | Seguridad del paciente | Aviso en `base.html`; solo dos mensajes del sistema: `COMBINACION_NO_CUBIERTA` y `SINTOMA_NO_CUBIERTO`. El segundo (a) solo remite a médico o farmacéutico; (c) se muestra "pendiente de aprobación médica" mientras `SALVAGUARDA_PENDIENTE_APROBACION=true`; (d) ningún otro texto fuera de las reglas. La salvaguarda nunca rebaja el nivel ni es desactivable; (b) texto literal y activación definidos en FR-020 | ✅ |
 | II | Conocimiento separado | Reglas y vocabulario se leen de la base al arrancar; solo `aprobada` y la versión más reciente; en el código solo están las dos plantillas autorizadas por la excepción del Principio II | ✅ |
-| III | Trazabilidad | `consulta` + hijas con `regla_id` de la versión exacta y `orden` de FR-009; nivel ya elevado; explicación con códigos y síntomas no cubiertos (FR-010) | ✅ |
-| IV | Hexagonal | Layout `src/domain`, `application`, `infrastructure`, `api`; `test_arquitectura.py` hace fallar la suite ante imports prohibidos | ❌ **nombre**: la constitución fija `SupabaseReglaRepository` y el plan usa `PostgresReglaRepository` por petición explícita (P7) |
-| V | Patrones | Repository (`ReglaRepository`/`ConsultaRepository` + `Postgres*Repository`), Port/Adapter (`MotorInferencia` + `ClipsMotorInferencia` + `FakeMotorInferencia`), Strategy (`ResolucionPorSeveridad`, que incluye la salvaguarda), Factory (`FabricaEntornoClips`), DTOs Pydantic, `Depends`; estado solo en `app.state` | ❌ mismo nombre que en IV (P7); el resto ✅ |
+| III | Trazabilidad | `consulta` + hijas con `regla_id` de la versión exacta y `orden` de FR-009; nivel ya elevado; explicación con códigos y síntomas no cubiertos (FR-010); el fallo técnico de persistencia (FR-019) sigue la única excepción del Principio III: resultado visible, error saneado en el log y marca de no persistida | ✅ |
+| IV | Hexagonal | Layout `src/domain`, `application`, `infrastructure`, `api`; `test_arquitectura.py` hace fallar la suite ante imports prohibidos; adaptadores `PostgresReglaRepository` y `PostgresConsultaRepository` como nombra la constitución | ✅ |
+| V | Patrones | Repository (`ReglaRepository`/`ConsultaRepository` + `Postgres*Repository`), Port/Adapter (`MotorInferencia` + `ClipsMotorInferencia` + `FakeMotorInferencia`), Strategy (`ResolucionPorSeveridad`, que incluye la salvaguarda), Factory (`FabricaEntornoClips`), DTOs Pydantic, `Depends`; estado solo en `app.state`, sin `app` a nivel de módulo (`uvicorn --factory`) | ✅ |
 | VI | Commits | Convención aplicada en `/speckit-implement`; esta funcionalidad no modifica reglas | ✅ |
 | VII | Ramas | `001-consulta-orientacion` ↔ `specs/001-consulta-orientacion/` | ✅ |
 | VIII | Pruebas | Unit (traductor, estrategia + salvaguarda, vocabulario, arquitectura, logs), integración (repositorios, carga completa), aceptación (30 casos R01–R30 sin salvaguarda activa), e2e (un caso por nivel + no cubierta + salvaguarda), cobertura ≥ 80 % | ✅ (ejecutarlas requiere P8) |
@@ -82,12 +82,11 @@ Contra la constitución **v1.1.0**.
 
 **Resultado del gate**:
 
-- **Diseño y `/speckit-tasks`: aprobado.** Las tareas pueden generarse ya.
-- **`/speckit-implement`: bloqueado** hasta resolver dos cosas:
-  1. **P7**: enmendar los Principios IV y V para que digan `PostgresReglaRepository`. La
-     gobernanza dice que las violaciones del Principio IV no admiten excepción, así que no basta
-     con justificarlo en Complexity Tracking. Alternativa: volver al nombre `Supabase*`.
-  2. **P6**: copiar el texto literal del mensaje de salvaguarda a FR-020 (Principio I (b)).
+- **Diseño, `/speckit-tasks` y `/speckit-implement`: aprobado.** No hay violaciones de la
+  constitución.
+- Para **ejecutar** la aplicación hace falta P3 (`.env` corregido), y para ejecutar las suites
+  `integration`, `aceptacion` y `e2e`, P8 (base de pruebas). Ninguno de los dos impide escribir el
+  código.
 
 ## Project Structure
 
@@ -165,6 +164,10 @@ src/
     └── estaticos/
         └── estilos.css
 
+docs/
+├── base-de-pruebas.md         # cómo crear la base separada de pruebas (FR-021)
+└── usabilidad-sc004.md        # tiempos de la prueba de usabilidad (SC-004)
+
 tests/
 ├── conftest.py                # exige TEST_DATABASE_URL ≠ DATABASE_URL (FR-021)
 ├── fakes/                     # FakeMotorInferencia, repositorios en memoria
@@ -172,6 +175,8 @@ tests/
 │   ├── domain/                # vocabulario, resolución + salvaguarda (tabla de decisión), orden FR-009
 │   ├── application/           # EvaluarConsulta y CargarBaseConocimiento con fakes; marca configurable
 │   ├── inference/             # traducción de cada regla a defrule, aislamiento de entornos
+│   │   ├── test_traduccion_30_reglas.py  # defrule exacto y disparo de cada una de las 30 reglas
+│   │   └── defrules_esperados.clp        # texto esperado (Apéndice B de tasks.md)
 │   ├── api/                   # DTOs, rutas con dependencias sustituidas, marca interna, mensajes del sistema
 │   ├── test_config.py         # SALVAGUARDA_PENDIENTE_APROBACION válida / inválida
 │   ├── test_logging.py        # redacción de secretos
@@ -181,10 +186,13 @@ tests/
 │   ├── test_postgres_consulta_repository.py
 │   ├── test_carga_base_conocimiento.py
 │   ├── test_combinaciones.py  # 16.128 combinaciones: CLIPS == oráculo FR-006/FR-020 (marcador lento)
+│   ├── test_concurrencia.py   # 20 consultas simultáneas y orden estable (SC-008, SC-010)
+│   ├── test_rls.py            # RLS activo en todas las tablas de public (Principio X)
 │   └── aceptacion/
 │       ├── casos_reglas.yaml  # biblioteca indexada R01–R30: hechos, nivel y códigos esperados
 │       └── test_aceptacion_reglas.py
 └── e2e/
+    ├── conftest.py            # levanta el servidor con DATABASE_URL = TEST_DATABASE_URL
     └── test_flujo_consulta.py # Orientar, Advertir, Derivar, no cubierta y salvaguarda (escenario 6)
 ```
 
@@ -199,6 +207,4 @@ quedan en `tests/fakes/`, fuera del código desplegable.
 
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| `PostgresReglaRepository` / `PostgresConsultaRepository` en lugar del `SupabaseReglaRepository` que nombran los Principios IV y V | Los adaptadores dependen de PostgreSQL vía SQLModel, no de Supabase; el mismo adaptador sirve para la base de pruebas separada de FR-021 | Mantener `Supabase*` describe mal la dependencia real. **No es una excepción admisible** (la gobernanza no permite excepciones al Principio IV): se resuelve con una enmienda PATCH de la constitución antes de implementar (P7) |
+Sin violaciones que justificar.

@@ -120,7 +120,8 @@ Los dos tipos nunca aparecen juntos.
   validada)". Si `pendiente_aprobacion` es `true`, se añade el distintivo visible
   "Pendiente de aprobación médica" (Principio I (c)).
 - La explicación va en `id="explicacion"`: "Reglas aplicadas: R18" (o "Ninguna regla aplicada")
-  y, si se activó la salvaguarda, "Salvaguarda del sistema: síntomas sin regla aplicable: Fiebre"
-  (FR-010).
+  y, si se activó la salvaguarda, "Salvaguarda del sistema (pendiente de aprobación médica):
+  síntomas sin regla aplicable: Fiebre" (FR-010). El paréntesis aparece solo mientras
+  `pendiente_aprobacion` sea `true`.
 - La marca de no persistida se transmite **solo** con el atributo `data-` y la cabecera; no se
   muestra ningún texto al usuario por ese motivo.
