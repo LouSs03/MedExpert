@@ -32,7 +32,8 @@ pytest -m "not integration and not aceptacion and not e2e"   # unitarias, sin re
 pytest -m integration                                        # repositorios contra la base de pruebas
 pytest -m aceptacion                                         # 30 casos R01–R30 (regresión)
 pytest -m e2e                                                # Playwright contra la base de pruebas
-pytest                                                       # todo + cobertura ≥ 80 % en domain/application
+pytest -m lento                                              # 16.128 combinaciones y concurrencia (~2,5 min)
+pytest --cov=domain --cov=application --cov-report=term-missing --cov-fail-under=80   # todo + cobertura
 ```
 
 Resultado esperado:
