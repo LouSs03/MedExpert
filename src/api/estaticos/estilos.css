@@ -1,0 +1,95 @@
+/* MedExpert: estilos legibles y accesibles (contraste AA; el nivel no depende solo del color). */
+
+:root {
+  --texto: #1b1b1b;
+  --fondo: #ffffff;
+  --borde: #6b6b6b;
+  --primario: #0b5394;
+  --orientar: #1d6b2f;
+  --orientar-fondo: #e7f4ea;
+  --advertir: #7a4a00;
+  --advertir-fondo: #fff4d6;
+  --derivar: #9b1c1c;
+  --derivar-fondo: #fde8e8;
+  --aviso-fondo: #eef2f7;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--borde);
+}
+.marca { font-weight: 700; font-size: 1.25rem; color: var(--primario); text-decoration: none; }
+.subtitulo { color: #444; }
+
+.aviso {
+  margin: 0;
+  padding: 0.75rem 1.25rem;
+  background: var(--aviso-fondo);
+  border-bottom: 2px solid var(--primario);
+  font-weight: 600;
+}
+
+.contenido { max-width: 46rem; margin: 0 auto; padding: 1.25rem; }
+
+fieldset { margin: 0 0 1rem; padding: 0.75rem 1rem; border: 1px solid var(--borde); border-radius: 6px; }
+legend { font-weight: 700; padding: 0 0.25rem; }
+.opcion { display: flex; gap: 0.5rem; align-items: center; padding: 0.3rem 0; cursor: pointer; }
+.opcion input { width: 1.2rem; height: 1.2rem; }
+
+.boton {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--primario);
+  border: 0;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.boton:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #f2a900; outline-offset: 2px; }
+
+.errores { padding: 0.75rem 1rem; border: 2px solid var(--derivar); background: var(--derivar-fondo); border-radius: 6px; }
+
+.resultado { padding: 1rem 1.25rem; border-left: 8px solid var(--borde); border-radius: 6px; }
+.nivel { display: flex; gap: 0.6rem; align-items: center; margin-top: 0; font-size: 1.8rem; }
+.nivel-orientar { border-left-color: var(--orientar); background: var(--orientar-fondo); }
+.nivel-orientar .nivel { color: var(--orientar); }
+.nivel-advertir { border-left-color: var(--advertir); background: var(--advertir-fondo); }
+.nivel-advertir .nivel { color: var(--advertir); }
+.nivel-derivar { border-left-color: var(--derivar); background: var(--derivar-fondo); }
+.nivel-derivar .nivel { color: var(--derivar); }
+
+.mensajes { margin: 0 0 0.75rem; padding-left: 1.25rem; }
+
+.mensajes-sistema { margin: 1rem 0; padding: 0.75rem 1rem; background: #ffffff; border: 2px dashed var(--borde); border-radius: 6px; }
+.mensajes-sistema h2 { margin-top: 0; font-size: 1.05rem; }
+.distintivo-pendiente {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: #5a2d82;
+  border-radius: 999px;
+}
+
+.explicacion { margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--borde); }
+.explicacion h2 { font-size: 1.05rem; margin: 0 0 0.25rem; }
