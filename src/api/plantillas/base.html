@@ -1,19 +1,42 @@
-<!DOCTYPE html>
+{% import "_iconos.html" as i %}<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block titulo %}MedExpert{% endblock %} · Orientación sobre automedicación</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="{{ url_for('estaticos', path='estilos.css') }}">
 </head>
-<body>
-  <header class="cabecera">
-    <a class="marca" href="/">MedExpert</a>
-    <span class="subtitulo">Orientación preventiva sobre automedicación</span>
-  </header>
-  <p id="aviso" class="aviso" role="note">{{ aviso }}</p>
-  <main class="contenido">
-    {% block contenido %}{% endblock %}
-  </main>
+<body class="{% block clase_pagina %}{% endblock %}">
+  <div class="pagina">
+    <div class="tarjeta">
+      <header class="barra">
+        <a class="marca" href="/" aria-label="MedExpert, ir al inicio">
+          {{ i.logo() }}<span>MedExpert</span>
+        </a>
+        <nav class="barra-enlaces" aria-label="Secciones">
+          <a href="/">Inicio</a>
+          <a href="/#como-funciona">Cómo funciona</a>
+          <a href="/#base-de-reglas">Base de reglas</a>
+          <a href="/#acerca">Acerca del proyecto</a>
+        </nav>
+        <div class="barra-accion">
+          {% block barra_accion %}
+          <a class="boton boton-primario" href="/consulta/paso/1">Consultar ahora</a>
+          {% endblock %}
+        </div>
+      </header>
+      <main class="contenido">
+        {% block contenido %}{% endblock %}
+      </main>
+    </div>
+    <p id="aviso" class="aviso" role="note">
+      {{ i.info("aviso-icono") }}<span>{{ aviso }}</span>
+    </p>
+  </div>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

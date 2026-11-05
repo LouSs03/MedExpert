@@ -1,42 +1,95 @@
 {% extends "base.html" %}
+{% import "_iconos.html" as i %}
 {% block titulo %}Resultado{% endblock %}
+{% block clase_pagina %}pagina-resultado{% endblock %}
+{% block barra_accion %}<a class="boton boton-primario" href="/consulta/paso/1">Nueva consulta</a>{% endblock %}
+
+{% macro icono_nivel(nivel, clase) -%}
+{% if nivel == "DERIVAR" %}{{ i.aspa(clase) }}{% elif nivel == "ADVERTIR" %}{{ i.triangulo(clase) }}{% else %}{{ i.check_circulo(clase) }}{% endif %}
+{%- endmacro %}
+
 {% block contenido %}
 {% set r = resultado %}
-{% set pendientes = r.mensajes_sistema | selectattr("pendiente_aprobacion") | list %}
-<section id="resultado" data-nivel="{{ r.nivel }}" data-salvaguarda="{{ 'true' if r.salvaguarda_activada else 'false' }}" data-consulta-persistida="{{ 'true' if r.persistida else 'false' }}" class="resultado nivel-{{ r.nivel | lower }}">
-  <h1 class="nivel">
-    <span class="nivel-icono" aria-hidden="true">{% if r.nivel == "DERIVAR" %}⛔{% elif r.nivel == "ADVERTIR" %}⚠{% else %}ℹ{% endif %}</span>
-    <span id="nivel">{{ r.nivel_etiqueta }}</span>
-  </h1>
+<section id="resultado" data-nivel="{{ r.nivel }}" data-salvaguarda="{{ 'true' if r.salvaguarda_activada else 'false' }}" data-consulta-persistida="{{ 'true' if r.persistida else 'false' }}" class="resultado nivel-{{ r.nivel | lower }}" aria-labelledby="titulo-resultado">
 
-  {% for regla in r.reglas_aplicadas %}
-  <div class="regla" data-regla="{{ regla.codigo }}">
-    <ul class="mensajes">
-      {% for mensaje in regla.mensajes %}<li>{{ mensaje }}</li>{% endfor %}
-    </ul>
+  <header class="resultado-encabezado">
+    <p class="etiqueta">Resultado de tu consulta</p>
+    <h1 id="titulo-resultado" class="titulo-resultado">
+      {{ icono_nivel(r.nivel, "titulo-icono") }}<span><span id="nivel" class="nivel-palabra">{{ r.nivel_etiqueta }}</span>: {{ titulo_complemento }}</span>
+    </h1>
+    <p class="cuerpo resultado-parrafo">{{ parrafo }}</p>
+  </header>
+
+  <div class="resultado-columnas">
+    <aside class="panel-paso panel-resultado" aria-label="Lo que consultaste">
+      <div class="panel-imagen">
+        <img class="imagen-producto" src="{{ url_for('static', path='img/cuidado.jpg') }}" alt="" width="320" height="320">
+      </div>
+      <p class="etiqueta">Lo que consultaste</p>
+      <ul class="chips">
+        {% for chip in consultado %}<li class="chip">{{ chip }}</li>{% endfor %}
+      </ul>
+    </aside>
+
+    <div class="recomendaciones">
+      <div class="recomendaciones-cabecera">
+        <h2 class="titulo-seccion">Recomendaciones</h2>
+        <span class="insignia-nivel insignia-{{ r.nivel | lower }}">{{ icono_nivel(r.nivel, "insignia-icono") }}{{ r.nivel_etiqueta }}</span>
+      </div>
+
+      {% for regla in r.reglas_aplicadas %}
+      <div class="regla" data-regla="{{ regla.codigo }}">
+        <ul class="filas">
+          {% for mensaje in regla.mensajes %}
+          <li class="fila">
+            <span class="insignia-regla" title="Regla {{ regla.codigo }}, versión {{ regla.version }}">{{ regla.codigo }}</span>
+            <span class="fila-texto">{{ mensaje }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+
+      {% if r.mensajes_sistema %}
+      <aside id="mensajes-sistema" class="mensajes-sistema" aria-label="Mensaje del sistema">
+        <p class="etiqueta-sistema">Mensaje del sistema (no proviene de una regla validada)</p>
+        <ul class="filas">
+          {% for mensaje in r.mensajes_sistema %}
+          <li class="fila fila-sistema">
+            {% if mensaje.tipo == "SINTOMA_NO_CUBIERTO" %}{{ i.triangulo("fila-icono fila-icono-ambar") }}{% else %}{{ i.info("fila-icono fila-icono-ambar") }}{% endif %}
+            <span class="fila-texto">{{ mensaje.texto }}{% if mensaje.pendiente_aprobacion %} <span class="distintivo-pendiente">Pendiente de aprobación médica</span>{% endif %}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </aside>
+      {% endif %}
+
+      <div id="explicacion" class="explicacion">
+        <p class="etiqueta">Por qué ves esto</p>
+        <p>{% if r.reglas_aplicadas %}Reglas aplicadas: {{ r.reglas_aplicadas | map(attribute="codigo") | join(", ") }}.{% else %}Ninguna regla aplicada.{% endif %}</p>
+        {% if r.reglas_aplicadas %}
+        <p>Una regla se aplica cuando lo que marcaste incluye todos sus síntomas y condiciones. El nivel es el más severo entre las reglas aplicadas{% if not subio_por_salvaguarda %}: {{ r.nivel_etiqueta }}{% endif %}.</p>
+        {% else %}
+        <p>Ninguna regla validada coincide con esta combinación; por eso el resultado es {{ r.nivel_etiqueta }}.</p>
+        {% endif %}
+        {% if r.salvaguarda_activada %}
+        <p>Salvaguarda del sistema{% if pendiente %} (pendiente de aprobación médica){% endif %}: síntomas sin regla aplicable: {{ r.sintomas_no_cubiertos | map(attribute="nombre") | join(", ") }}.{% if subio_por_salvaguarda %} Por eso el nivel sube de {{ nivel_reglas }} a {{ r.nivel_etiqueta }}.{% else %} El nivel no baja: se mantiene en {{ r.nivel_etiqueta }}.{% endif %}</p>
+        {% endif %}
+      </div>
+    </div>
   </div>
-  {% endfor %}
 
-  {% if r.mensajes_sistema %}
-  <aside id="mensajes-sistema" class="mensajes-sistema">
-    <h2>Mensaje del sistema (no proviene de una regla validada)</h2>
-    {% for mensaje in r.mensajes_sistema %}
-    <p class="mensaje-sistema">
-      {{ mensaje.texto }}
-      {% if mensaje.pendiente_aprobacion %}<span class="distintivo-pendiente">Pendiente de aprobación médica</span>{% endif %}
-    </p>
+  <dl class="metricas">
+    {% for metrica in metricas %}
+    <div class="metrica">
+      <dt>{{ metrica.etiqueta }}</dt>
+      <dd>{{ metrica.valor }}</dd>
+    </div>
     {% endfor %}
-  </aside>
-  {% endif %}
+  </dl>
 
-  <div id="explicacion" class="explicacion">
-    <h2>Explicación del razonamiento</h2>
-    <p>{% if r.reglas_aplicadas %}Reglas aplicadas: {{ r.reglas_aplicadas | map(attribute="codigo") | join(", ") }}{% else %}Ninguna regla aplicada{% endif %}</p>
-    {% if r.salvaguarda_activada %}
-    <p>Salvaguarda del sistema{% if pendientes %} (pendiente de aprobación médica){% endif %}: síntomas sin regla aplicable: {{ r.sintomas_no_cubiertos | map(attribute="nombre") | join(", ") }}</p>
-    {% endif %}
-  </div>
+  <p class="resultado-acciones">
+    <a class="boton boton-primario boton-grande" href="/consulta/paso/1">Hacer otra consulta {{ i.flecha("boton-icono") }}</a>
+  </p>
 </section>
-
-<p><a class="boton" href="/">Hacer otra consulta</a></p>
 {% endblock %}

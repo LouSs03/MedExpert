@@ -3,6 +3,7 @@
 Escenarios 1, 2, 3, 6, 8 y 9 de quickstart.md, contra la base de pruebas.
 """
 
+import re
 import time
 
 import pytest
@@ -13,17 +14,30 @@ pytestmark = pytest.mark.e2e
 AVISO = "Prototipo académico: no reemplaza la consulta médica o farmacéutica."
 
 
+def _hasta_el_paso_3(
+    page: Page, servidor: str, medicamento: str, sintomas: list[str], condiciones: list[str]
+) -> None:
+    """Recorre los pasos 1 a 3 marcando las opciones; queda listo para enviar la consulta."""
+    page.goto(f"{servidor}/consulta/paso/1")
+    expect(page.locator("#aviso")).to_have_text(AVISO)
+    page.click(f'button[data-valor="{medicamento}"]')
+    page.click("button.avanzar")
+    expect(page.locator("#aviso")).to_have_text(AVISO)
+    for sintoma in sintomas:
+        page.click(f'button[data-valor="{sintoma}"]')
+    page.click("button.avanzar")
+    expect(page.locator("#aviso")).to_have_text(AVISO)
+    for condicion in condiciones:
+        page.click(f'button[data-valor="{condicion}"]')
+    if not condiciones:
+        page.click("button[data-ninguna]")
+
+
 def _consultar(
     page: Page, servidor: str, medicamento: str, sintomas: list[str], condiciones: list[str]
 ) -> None:
-    page.goto(servidor)
-    expect(page.locator("#aviso")).to_have_text(AVISO)
-    page.check(f'input[name="medicamento"][value="{medicamento}"]')
-    for sintoma in sintomas:
-        page.check(f'input[name="sintomas"][value="{sintoma}"]')
-    for condicion in condiciones:
-        page.check(f'input[name="condiciones"][value="{condicion}"]')
-    page.click('button[type="submit"]')
+    _hasta_el_paso_3(page, servidor, medicamento, sintomas, condiciones)
+    page.click("button.avanzar")
     expect(page.locator("#resultado")).to_be_visible()
     expect(page.locator("#aviso")).to_have_text(AVISO)
 
@@ -101,15 +115,62 @@ def test_combinacion_no_cubierta(
 
 
 def test_escenario_6_responde_en_menos_de_2_segundos(page: Page, servidor: str) -> None:
-    """SC-005: del envío del formulario a la aparición de #resultado, menos de 2 s."""
-    page.goto(servidor)
-    page.check('input[name="medicamento"][value="IBUPROFENO"]')
-    page.check('input[name="sintomas"][value="DOLOR_CABEZA"]')
-    page.check('input[name="sintomas"][value="FIEBRE"]')
+    """SC-005: del envío de la consulta a la aparición de #resultado, menos de 2 s."""
+    _hasta_el_paso_3(page, servidor, "IBUPROFENO", ["DOLOR_CABEZA", "FIEBRE"], [])
 
     inicio = time.perf_counter()
-    page.click('button[type="submit"]')
+    page.click("button.avanzar")
     page.wait_for_selector("#resultado", state="visible")
     transcurrido = time.perf_counter() - inicio
 
     assert transcurrido < 2.0, f"{transcurrido:.2f} s"
+
+
+def test_paso_3_ninguna_es_excluyente_y_controla_el_avance(page: Page, servidor: str) -> None:
+    """Al marcar «ninguna» se limpian las condiciones y viceversa; sin elegir, no se avanza."""
+    page.goto(f"{servidor}/consulta/paso/3?medicamento=PARACETAMOL&sintomas=FIEBRE")
+    avanzar = page.locator("button.avanzar")
+    ninguna = page.locator("button[data-ninguna]")
+    embarazo = page.locator('button[data-valor="EMBARAZO"]')
+    diabetes = page.locator('button[data-valor="DIABETES"]')
+
+    expect(avanzar).to_have_attribute("aria-disabled", "true")
+    avanzar.click(
+        force=True
+    )  # Playwright lo considera deshabilitado; se fuerza para probar el bloqueo.
+    expect(page).to_have_url(f"{servidor}/consulta/paso/3?medicamento=PARACETAMOL&sintomas=FIEBRE")
+
+    embarazo.click()
+    diabetes.click()
+    expect(embarazo).to_have_attribute("aria-pressed", "true")
+    expect(avanzar).to_have_attribute("aria-disabled", "false")
+
+    ninguna.click()
+    expect(ninguna).to_have_attribute("aria-pressed", "true")
+    expect(embarazo).to_have_attribute("aria-pressed", "false")
+    expect(diabetes).to_have_attribute("aria-pressed", "false")
+    expect(avanzar).to_have_attribute("aria-disabled", "false")
+
+    embarazo.click()
+    expect(ninguna).to_have_attribute("aria-pressed", "false")
+
+    embarazo.click()
+    expect(avanzar).to_have_attribute("aria-disabled", "true")
+    expect(avanzar).to_have_attribute("aria-label", re.compile("Marque al menos una condición"))
+
+
+def test_volver_conserva_lo_elegido(page: Page, servidor: str) -> None:
+    _hasta_el_paso_3(page, servidor, "IBUPROFENO", ["DOLOR_CABEZA", "FIEBRE"], ["DIABETES"])
+    page.click("a.volver")
+
+    expect(page.locator("#titulo-paso")).to_have_text("Seleccione el síntoma a tratar")
+    expect(page.locator('button[data-valor="DOLOR_CABEZA"]')).to_have_attribute(
+        "aria-pressed", "true"
+    )
+    expect(page.locator('button[data-valor="FIEBRE"]')).to_have_attribute("aria-pressed", "true")
+    expect(page.locator(".chip")).to_have_text(["Ibuprofeno"])
+
+    page.click("a.volver")
+    expect(page.locator('button[data-valor="IBUPROFENO"]')).to_have_attribute(
+        "aria-pressed", "true"
+    )

@@ -90,6 +90,7 @@ def create_app() -> FastAPI:
     app.state.base = None
     app.state.plantillas = Jinja2Templates(directory=DIRECTORIO / "plantillas")
     app.mount("/estaticos", StaticFiles(directory=DIRECTORIO / "estaticos"), name="estaticos")
+    app.mount("/static", StaticFiles(directory=DIRECTORIO / "static"), name="static")
     app.include_router(consulta.router)
     app.include_router(salud.router)
     app.add_exception_handler(ServicioNoDisponible, _manejar_no_disponible)

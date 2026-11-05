@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% import "_iconos.html" as i %}
+{% block titulo %}Inicio{% endblock %}
+{% block clase_pagina %}pagina-portada{% endblock %}
+
+{% block contenido %}
+<section class="hero" aria-labelledby="titular">
+  <div class="hero-texto">
+    <span class="etiqueta etiqueta-menta">{{ i.escudo("etiqueta-icono") }}Orientación preventiva</span>
+    <h1 id="titular" class="titular">Piensa antes de automedicarte</h1>
+    <p class="cuerpo hero-parrafo">
+      Indica el medicamento que piensas tomar, tus síntomas y tus condiciones. MedExpert los compara
+      con su base de reglas y te dice si puedes orientarte, si debes tener precaución o si conviene
+      consultar a un médico, explicando qué reglas aplicó.
+    </p>
+    <a class="boton boton-primario boton-grande" href="/consulta/paso/1">
+      Iniciar consulta {{ i.flecha("boton-icono") }}
+    </a>
+    <ul class="verificaciones" aria-label="Características">
+      <li>{{ i.check_circulo("verificacion-icono") }}{{ num_reglas }} reglas revisadas</li>
+      <li>{{ i.check_circulo("verificacion-icono") }}{{ medicamentos }}</li>
+      <li>{{ i.check_circulo("verificacion-icono") }}Sin datos personales</li>
+    </ul>
+  </div>
+
+  <div class="hero-visual" aria-hidden="true">
+    <div class="hero-circulo">
+      <img class="imagen-producto" src="{{ url_for('static', path='img/cuidado.jpg') }}" alt=""
+           width="640" height="640">
+    </div>
+    <span class="chip-flotante chip-arriba">{{ i.check_circulo("chip-icono") }}Reglas validadas por un médico</span>
+    <span class="chip-flotante chip-abajo">{{ i.info("chip-icono chip-icono-ambar") }}No reemplaza al médico</span>
+  </div>
+</section>
+
+<section id="como-funciona" class="seccion" aria-labelledby="titulo-como-funciona">
+  <h2 id="titulo-como-funciona" class="titulo-seccion">Cómo funciona</h2>
+  <ol class="pasos-resumen">
+    <li><span class="paso-numero">1</span><div><strong>Medicamento.</strong> Elige el que piensas tomar.</div></li>
+    <li><span class="paso-numero">2</span><div><strong>Síntomas.</strong> Marca uno o varios.</div></li>
+    <li><span class="paso-numero">3</span><div><strong>Condiciones.</strong> Indica las que te apliquen, o ninguna.</div></li>
+  </ol>
+  <p class="cuerpo">
+    El sistema razona con encadenamiento hacia adelante sobre reglas validadas. Si ninguna regla
+    aplica, te deriva al médico; nunca inventa una recomendación.
+  </p>
+</section>
+
+<section id="base-de-reglas" class="seccion" aria-labelledby="titulo-base">
+  <h2 id="titulo-base" class="titulo-seccion">Base de reglas</h2>
+  <dl class="cifras">
+    <div><dt>Reglas aprobadas</dt><dd>{{ num_reglas }}</dd></div>
+    <div><dt>Medicamentos</dt><dd>{{ num_medicamentos }}</dd></div>
+    <div><dt>Síntomas</dt><dd>{{ num_sintomas }}</dd></div>
+    <div><dt>Condiciones</dt><dd>{{ num_condiciones }}</dd></div>
+  </dl>
+</section>
+
+<section id="acerca" class="seccion" aria-labelledby="titulo-acerca">
+  <h2 id="titulo-acerca" class="titulo-seccion">Acerca del proyecto</h2>
+  <p class="cuerpo">
+    MedExpert es un prototipo académico desarrollado como tesis de pregrado en Perú. Orienta de
+    forma preventiva sobre automedicación; no prescribe ni diagnostica, no guarda datos personales
+    y no reemplaza la consulta médica o farmacéutica.
+  </p>
+</section>
+{% endblock %}
