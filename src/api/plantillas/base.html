@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}MedExpert{% endblock %} · Orientación sobre automedicación</title>
+  <link rel="stylesheet" href="{{ url_for('estaticos', path='estilos.css') }}">
+</head>
+<body>
+  <header class="cabecera">
+    <a class="marca" href="/">MedExpert</a>
+    <span class="subtitulo">Orientación preventiva sobre automedicación</span>
+  </header>
+  <p id="aviso" class="aviso" role="note">{{ aviso }}</p>
+  <main class="contenido">
+    {% block contenido %}{% endblock %}
+  </main>
+</body>
+</html>

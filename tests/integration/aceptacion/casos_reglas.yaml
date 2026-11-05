@@ -1,0 +1,261 @@
+# Biblioteca indexada de casos de prueba R01-R30 (Principio VIII; Buchanan y Shortliffe, 1984).
+# Fuente: Apéndices A y B de specs/001-consulta-orientacion/tasks.md (2026-11-04).
+# Si cambia una regla, este archivo, los apéndices y defrules_esperados.clp se actualizan
+# en el mismo commit, citando el código de la regla (Principio VI).
+casos:
+  - codigo: R01
+    regla_id: 1
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_CABEZA]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R01]
+    salvaguarda: false
+  - codigo: R02
+    regla_id: 2
+    medicamento: PARACETAMOL
+    sintomas: [FIEBRE]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R02]
+    salvaguarda: false
+  - codigo: R03
+    regla_id: 3
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_MUSCULAR]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R03]
+    salvaguarda: false
+  - codigo: R04
+    regla_id: 4
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_DENTAL]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R04]
+    salvaguarda: false
+  - codigo: R05
+    regla_id: 5
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_ABDOMINAL]
+    condiciones: []
+    nivel_esperado: ADVERTIR
+    reglas_esperadas: [R05]
+    salvaguarda: false
+  - codigo: R06
+    regla_id: 6
+    medicamento: PARACETAMOL
+    sintomas: [FIEBRE, MOLESTIAS_RESPIRATORIAS]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R06, R02]
+    salvaguarda: false
+  - codigo: R07
+    regla_id: 7
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_CABEZA, FIEBRE]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R07, R01, R02]
+    salvaguarda: false
+  - codigo: R08
+    regla_id: 8
+    medicamento: PARACETAMOL
+    sintomas: [FIEBRE, DOLOR_MUSCULAR]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R08, R02, R03]
+    salvaguarda: false
+  - codigo: R09
+    regla_id: 9
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_CABEZA]
+    condiciones: [HIPERTENSION]
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R09]
+    salvaguarda: false
+  - codigo: R10
+    regla_id: 10
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_CABEZA]
+    condiciones: [EMBARAZO]
+    nivel_esperado: ADVERTIR
+    reglas_esperadas: [R10]
+    salvaguarda: false
+  - codigo: R11
+    regla_id: 11
+    medicamento: PARACETAMOL
+    sintomas: [FIEBRE]
+    condiciones: [EMBARAZO]
+    nivel_esperado: DERIVAR
+    reglas_esperadas: [R11]
+    salvaguarda: false
+  - codigo: R12
+    regla_id: 12
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_MUSCULAR]
+    condiciones: [ADULTO_MAYOR]
+    nivel_esperado: ADVERTIR
+    reglas_esperadas: [R12]
+    salvaguarda: false
+  - codigo: R13
+    regla_id: 13
+    medicamento: PARACETAMOL
+    sintomas: [FIEBRE, DOLOR_ABDOMINAL]
+    condiciones: []
+    nivel_esperado: DERIVAR
+    reglas_esperadas: [R13, R05, R02]
+    salvaguarda: false
+  - codigo: R14
+    regla_id: 14
+    medicamento: PARACETAMOL
+    sintomas: [FIEBRE, MOLESTIAS_RESPIRATORIAS]
+    condiciones: [USO_ANTIGRIPAL]
+    nivel_esperado: ADVERTIR
+    reglas_esperadas: [R14]
+    salvaguarda: false
+  - codigo: R15
+    regla_id: 15
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_MUSCULAR]
+    condiciones: [ADULTO_MAYOR, USO_ASPIRINA]
+    nivel_esperado: ADVERTIR
+    reglas_esperadas: [R15, R12]
+    salvaguarda: false
+  - codigo: R16
+    regla_id: 16
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_DENTAL]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R16]
+    salvaguarda: false
+  - codigo: R17
+    regla_id: 17
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_MUSCULAR]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R17]
+    salvaguarda: false
+  - codigo: R18
+    regla_id: 18
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_CABEZA]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R18]
+    salvaguarda: false
+  - codigo: R19
+    regla_id: 19
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_ABDOMINAL]
+    condiciones: []
+    nivel_esperado: DERIVAR
+    reglas_esperadas: [R19]
+    salvaguarda: false
+  - codigo: R20
+    regla_id: 20
+    medicamento: IBUPROFENO
+    sintomas: [FIEBRE, DOLOR_MUSCULAR]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R20, R17]
+    salvaguarda: false
+  - codigo: R21
+    regla_id: 21
+    medicamento: IBUPROFENO
+    sintomas: [FIEBRE, MOLESTIAS_RESPIRATORIAS]
+    condiciones: []
+    nivel_esperado: ORIENTAR
+    reglas_esperadas: [R21]
+    salvaguarda: false
+  - codigo: R22
+    regla_id: 22
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_CABEZA]
+    condiciones: [EMBARAZO]
+    nivel_esperado: DERIVAR
+    reglas_esperadas: [R22]
+    salvaguarda: false
+  - codigo: R23
+    regla_id: 23
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_MUSCULAR]
+    condiciones: [HIPERTENSION]
+    nivel_esperado: ADVERTIR
+    reglas_esperadas: [R23]
+    salvaguarda: false
+  - codigo: R24
+    regla_id: 24
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_DENTAL]
+    condiciones: [DIABETES]
+    nivel_esperado: ADVERTIR
+    reglas_esperadas: [R24]
+    salvaguarda: false
+  - codigo: R25
+    regla_id: 25
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_MUSCULAR]
+    condiciones: [ADULTO_MAYOR]
+    nivel_esperado: ADVERTIR
+    reglas_esperadas: [R25]
+    salvaguarda: false
+  - codigo: R26
+    regla_id: 26
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_CABEZA]
+    condiciones: [USO_ANTIGRIPAL]
+    nivel_esperado: ADVERTIR
+    reglas_esperadas: [R26]
+    salvaguarda: false
+  - codigo: R27
+    regla_id: 27
+    medicamento: IBUPROFENO
+    sintomas: [FIEBRE, MOLESTIAS_RESPIRATORIAS]
+    condiciones: [USO_ASPIRINA]
+    nivel_esperado: ADVERTIR
+    reglas_esperadas: [R27]
+    salvaguarda: false
+  - codigo: R28
+    regla_id: 28
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_MUSCULAR]
+    condiciones: [HIPERTENSION, ADULTO_MAYOR]
+    nivel_esperado: DERIVAR
+    reglas_esperadas: [R28, R23, R25]
+    salvaguarda: false
+  - codigo: R29
+    regla_id: 29
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_MUSCULAR]
+    condiciones: [DIABETES, HIPERTENSION]
+    nivel_esperado: DERIVAR
+    reglas_esperadas: [R29, R23]
+    salvaguarda: false
+  - codigo: R30
+    regla_id: 30
+    medicamento: IBUPROFENO
+    sintomas: [DOLOR_DENTAL]
+    condiciones: [ADULTO_MAYOR, OTRO_TRATAMIENTO]
+    nivel_esperado: DERIVAR
+    reglas_esperadas: [R30]
+    salvaguarda: false
+
+# Combinaciones que ninguna regla aprobada cubre (US2, FR-011, SC-002): Derivar al médico con el
+# único mensaje de combinación no cubierta. Verificadas con el oráculo sobre las reglas reales.
+no_cubiertos:
+  - id: ibuprofeno-fiebre
+    medicamento: IBUPROFENO
+    sintomas: [FIEBRE]
+    condiciones: []
+    nivel_esperado: DERIVAR
+    sin_regla: true
+  - id: paracetamol-dolor-cabeza-aspirina
+    medicamento: PARACETAMOL
+    sintomas: [DOLOR_CABEZA]
+    condiciones: [USO_ASPIRINA]
+    nivel_esperado: DERIVAR
+    sin_regla: true
